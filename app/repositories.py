@@ -1,6 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from app.orm_models import ArticleORM, AuthorORM
+from sqlalchemy.orm import joinedload
 
 
 class ArticleRepository:
@@ -8,10 +9,11 @@ class ArticleRepository:
         self.db = db
 
     async def get_all(self, limit: int | None = None, offset: int | None = None):
-        query = select(ArticleORM)
         # total count
         total_result = await self.db.execute(select(ArticleORM))
         total = len(total_result.scalars().all())
+
+        query = select(ArticleORM).options(joinedload(ArticleORM.authors))
 
         if limit is not None:
             query = query.limit(limit)
@@ -19,7 +21,7 @@ class ArticleRepository:
             query = query.offset(offset)
 
         result = await self.db.execute(query)
-        items = result.scalars().all()
+        items = result.scalars().unique().all()
         return items, total
 
     async def get_by_id(self, article_id: int):
