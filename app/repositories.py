@@ -8,12 +8,23 @@ class ArticleRepository:
     def __init__(self, db: AsyncSession):
         self.db = db
 
-    async def get_all(self, limit: int | None = None, offset: int | None = None):
+    async def get_all(
+        self,
+        limit: int | None = None,
+        offset: int | None = None,
+        search: str | None = None,
+    ):
         # total count
         total_result = await self.db.execute(select(ArticleORM))
         total = len(total_result.scalars().all())
 
         query = select(ArticleORM).options(joinedload(ArticleORM.authors))
+
+        if search is not None:
+            query = query.where(
+                ArticleORM.title.ilike(f"%{search}%")
+                | ArticleORM.abstract.ilike(f"%{search}%")
+            )
 
         if limit is not None:
             query = query.limit(limit)

@@ -17,9 +17,10 @@ async def get_service(db: AsyncSession = Depends(database.get_db)):
 async def read_articles(
     page: int = 1,
     page_size: int = 10,
+    query: str | None = None,
     service: services.ArticleService = Depends(get_service),
 ):
-    return await service.get_all(page=page, page_size=page_size)
+    return await service.get_all(page=page, page_size=page_size, query=query)
 
 
 @router.get("/pdf/{filename}")
