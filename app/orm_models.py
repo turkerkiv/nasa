@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
-from app.database import Base
+from database import Base
 
 
 class ArticleORM(Base):
@@ -12,6 +12,8 @@ class ArticleORM(Base):
     publication_date = Column(DateTime)
     file_name = Column(String)
     keywords = Column(String)
+    citation_count = Column(Integer, default=0)
+    article_url = Column(String)
     created_at = Column(DateTime, default=datetime.utcnow)
 
 
