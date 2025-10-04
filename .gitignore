@@ -1,1 +1,42 @@
-/venv/
+/pdf_storage/
+/app/database.py
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+
+# Virtual environment
+venv/
+.env/
+.venv/
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# Databases
+*.sqlite3
+*.db
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Testing / Coverage
+.coverage
+htmlcov/
+.tox/
+.pytest_cache/
+
