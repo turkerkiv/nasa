@@ -6,16 +6,13 @@ from datetime import datetime
 class ArticleBase(BaseModel):
     id: int
     title: str
-    abstract: Optional[str] = None
-    publication_date: Optional[datetime] = None
-    file_name: Optional[str] = None
-    keywords: Optional[str] = None
-
-
-class ArticleRead(ArticleBase):
-    created_at: Optional[datetime] = None
-
-    model_config = {"extra": "ignore", "from_attributes": True}
+    abstract: str
+    publication_date: datetime
+    file_name: str
+    keywords: list[str]
+    citation_count: int
+    author_names: Optional[list[str]] = []
+    article_url: str
 
 
 class ArticleListItem(BaseModel):

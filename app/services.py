@@ -1,7 +1,8 @@
 from typing import List
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.repositories import ArticleRepository, AuthorRepository
+from app.repositories import ArticleRepository
 from app.schemas import ArticleListItem, PaginatedArticles
+from app.schemas import ArticleBase
 
 
 class ArticleService:
@@ -19,8 +20,6 @@ class ArticleService:
 
         pydantic_items: List[ArticleListItem] = []
         for a in items:
-            author_names = [author.name for author in a.authors]
-            print("Author Names:", author_names)
             pydantic_items.append(
                 ArticleListItem(
                     id=a.id,
@@ -33,10 +32,27 @@ class ArticleService:
                         else a.abstract or ""
                     ),
                     keywords=a.keywords.split(",") if a.keywords else [],
-                    author_names=author_names,
+                    author_names=[author.name for author in a.authors],
                 )
             )
 
         return PaginatedArticles(
             items=pydantic_items, total=total, page=page, page_size=page_size
+        )
+
+    async def get_by_id(self, article_id: int) -> ArticleBase | None:
+        author = await self.articleRepo.get_by_id(article_id)
+        if author is None:
+            return None
+
+        return ArticleBase(
+            id=author.id,
+            title=author.title,
+            abstract=author.abstract,
+            publication_date=author.publication_date,
+            file_name=author.file_name,
+            keywords=author.keywords.split(",") if author.keywords else [],
+            citation_count=author.citation_count,
+            author_names=[author.name for author in author.authors],
+            article_url=author.article_url,
         )

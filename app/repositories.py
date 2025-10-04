@@ -26,9 +26,11 @@ class ArticleRepository:
 
     async def get_by_id(self, article_id: int):
         result = await self.db.execute(
-            select(ArticleORM).where(ArticleORM.id == article_id)
+            select(ArticleORM)
+            .options(joinedload(ArticleORM.authors))
+            .where(ArticleORM.id == article_id)
         )
-        return result.scalar_one_or_none()
+        return result.unique().scalar_one_or_none()
 
     async def create(self, article: ArticleORM):
         self.db.add(article)
