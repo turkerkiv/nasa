@@ -24,7 +24,6 @@ async def read_articles(
 
 @router.get("/pdf/{filename}")
 async def get_article_file(filename: str):
-    # Restrict the base directory to the project's pdf_storage folder
     base = Path(__file__).resolve().parents[1].parent.joinpath("pdf_storage").resolve()
     # Prevent path traversal by resolving and ensuring it is inside base
     requested = (base / filename).resolve()
@@ -34,7 +33,9 @@ async def get_article_file(filename: str):
         raise HTTPException(status_code=404, detail="File not found")
 
     return FileResponse(
-        path=str(requested), filename=requested.name, media_type="application/pdf"
+        path=str(requested),
+        headers={"Content-Disposition": f'inline; filename="{requested.name}"'},
+        media_type="application/pdf",
     )
 
 
