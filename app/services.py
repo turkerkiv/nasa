@@ -2,7 +2,92 @@ from typing import List
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.repositories import ArticleRepository
 from app.schemas import ArticleListItem, PaginatedArticles
-from app.schemas import ArticleBase
+from app.schemas import ArticleBase, YearCount
+from pathlib import Path
+import asyncio
+
+
+class ChatService:
+    def __init__(self, db: AsyncSession):
+        # reuse repository to fetch article metadata
+        self.articleRepo = ArticleRepository(db)
+
+    async def chat(self, article_id: int, message: str) -> str:
+        # fetch raw article ORM object
+        article = await self.articleRepo.get_by_id(article_id)
+        if article is None:
+            raise ValueError("Article not found")
+
+        file_name = article.file_name
+        if not file_name:
+            raise ValueError("Article has no associated PDF file")
+
+        # locate pdf_storage at project root (app/ -> parent)
+        base = Path(__file__).resolve().parents[1].joinpath("pdf_storage").resolve()
+        requested = (base / file_name).resolve()
+
+        if not str(requested).startswith(str(base)):
+            raise ValueError("Invalid filename")
+        if not requested.exists() or not requested.is_file():
+            raise FileNotFoundError("PDF file not found")
+
+        # extract text lazily
+        try:
+            import PyPDF2
+        except Exception:
+            raise RuntimeError(
+                "Missing dependency: PyPDF2. Install with pip install PyPDF2"
+            )
+
+        try:
+            text_chunks = []
+            with open(requested, "rb") as f:
+                reader = PyPDF2.PdfReader(f)
+                for page in reader.pages:
+                    try:
+                        text = page.extract_text() or ""
+                    except Exception:
+                        text = ""
+                    if text:
+                        text_chunks.append(text)
+            full_text = "\n".join(text_chunks)
+        except Exception as e:
+            raise RuntimeError(f"Failed to read PDF: {e}")
+
+        # api_key = os.environ.get("GEMINI_API_KEY")
+        # if not api_key:
+        #     raise RuntimeError("GEMINI_API_KEY environment variable not set")
+        api_key = "AIzaSyAovndSW-zxvmLzX4iI6eeLVLeiw8Cbkb0"
+
+        try:
+            from google import genai
+        except Exception:
+            raise RuntimeError(
+                "Missing dependency: google-genai SDK. Install with pip install google-genai"
+            )
+
+        MODEL_NAME = "gemini-2.5-flash"
+
+        article_preview = full_text[:20000]
+        history = [
+            {
+                "role": "user",
+                "parts": [
+                    {"text": f"Article content:\n{article_preview}"},
+                    {"text": f"User message:\n{message}"},
+                ],
+            }
+        ]
+
+        def call_gemini():
+            client = genai.Client(api_key=api_key)
+            chat = client.chats.create(model=MODEL_NAME, history=history)
+            resp = chat.send_message(message)
+            return resp.text
+
+        loop = asyncio.get_running_loop()
+        reply = await loop.run_in_executor(None, call_gemini)
+        return reply
 
 
 class ArticleService:
@@ -58,5 +143,20 @@ class ArticleService:
             keywords=article.keywords,
             citation_count=article.citation_count,
             author_names=article.authors,
-            article_url=article.article_url,
         )
+
+    async def get_popular_keywords(self, top_n: int = 10) -> list[str]:
+        """
+        Return the top N popular keywords across articles as a list of strings
+        ordered by frequency descending.
+        """
+        common = await self.articleRepo.get_top_keywords(top_n=top_n)
+        # common is list of (keyword, count)
+        return [k for k, _ in common]
+
+    async def get_article_counts_by_year(self) -> list[YearCount]:
+        """
+        Return list of YearCount objects (year, count), sorted by year descending.
+        """
+        pairs = await self.articleRepo.get_counts_by_year()
+        return [YearCount(year=int(y), count=int(c)) for y, c in pairs]
