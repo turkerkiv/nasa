@@ -5,24 +5,24 @@ from datetime import datetime
 
 class ArticleBase(BaseModel):
     id: int
-    title: str
-    abstract: str
-    publication_date: datetime
-    file_name: str
-    keywords: list[str]
-    citation_count: int
-    author_names: Optional[list[str]] = []
-    article_url: str
+    title: Optional[str] = None
+    abstract: Optional[str] = None
+    publication_date: Optional[datetime] = None
+    file_name: Optional[str] = None
+    keywords: Optional[str] = None
+    citation_count: Optional[int] = 0
+    author_names: Optional[str] = None
+    doi: Optional[str] = None
 
 
 class ArticleListItem(BaseModel):
     id: int
-    title: str
-    abstract_compressed: str
-    publication_date: datetime
-    keywords: list[str]
-    citation_count: int
-    author_names: Optional[list[str]] = []
+    title: Optional[str] = None
+    abstract_compressed: Optional[str] = None
+    publication_date: Optional[datetime] = None
+    keywords: Optional[str] = None
+    citation_count: Optional[int] = 0
+    author_names: Optional[str] = None
 
 
 class PaginatedArticles(BaseModel):

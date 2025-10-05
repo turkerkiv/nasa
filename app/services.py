@@ -35,8 +35,8 @@ class ArticleService:
                         if a.abstract and len(a.abstract) > 50
                         else a.abstract or ""
                     ),
-                    keywords=a.keywords.split(",") if a.keywords else [],
-                    author_names=[author.name for author in a.authors],
+                    keywords=a.keywords,
+                    author_names=a.authors,
                 )
             )
 
@@ -45,18 +45,18 @@ class ArticleService:
         )
 
     async def get_by_id(self, article_id: int) -> ArticleBase | None:
-        author = await self.articleRepo.get_by_id(article_id)
-        if author is None:
+        article = await self.articleRepo.get_by_id(article_id)
+        if article is None:
             return None
 
         return ArticleBase(
-            id=author.id,
-            title=author.title,
-            abstract=author.abstract,
-            publication_date=author.publication_date,
-            file_name=author.file_name,
-            keywords=author.keywords.split(",") if author.keywords else [],
-            citation_count=author.citation_count,
-            author_names=[author.name for author in author.authors],
-            article_url=author.article_url,
+            id=article.id,
+            title=article.title,
+            abstract=article.abstract,
+            publication_date=article.publication_date,
+            file_name=article.file_name,
+            keywords=article.keywords,
+            citation_count=article.citation_count,
+            author_names=article.authors,
+            article_url=article.article_url,
         )
