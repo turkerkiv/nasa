@@ -8,6 +8,20 @@ class ArticleRepository:
     def __init__(self, db: AsyncSession):
         self.db = db
 
+    async def get_pill_info_by_article(self, article_id: int):
+        """
+        Return the ArticlePillInfoORM object associated with the given article_id
+        or None if not found.
+        """
+        from app.orm_models import ArticlePillInfoORM
+
+        result = await self.db.execute(
+            select(ArticlePillInfoORM).where(
+                ArticlePillInfoORM.article_id == article_id
+            )
+        )
+        return result.scalar_one_or_none()
+
     async def get_all(
         self,
         limit: int | None = None,
