@@ -30,3 +30,8 @@ class PaginatedArticles(BaseModel):
     total: int
     page: int
     page_size: int
+
+
+class ChatRequest(BaseModel):
+    article_id: int
+    message: str
