@@ -120,26 +120,36 @@ const GraphPanel = ({ trendData, categories }) => (
         <h4 className="text-sm font-medium text-gray-400 mb-4">Kategori Dağılımı</h4>
         <ResponsiveContainer width="100%" height={200}>
           <PieChart>
-            <Pie data={categories} cx="50%" cy="50%" outerRadius={70} dataKey="value" label={(entry) => entry.name}>
-              {categories.map((entry, index) => (
+            <Pie
+              data={categories.length > 0 ? categories.map((cat, idx) => ({ name: cat, value: 1 + (idx % 5), color: ["#6366f1", "#8b5cf6", "#f59e42", "#10b981", "#ef4444"][idx % 5] })) : [
+                { name: "Space Biology", value: 5, color: "#6366f1" },
+                { name: "Genomics", value: 3, color: "#8b5cf6" },
+                { name: "Microgravity", value: 4, color: "#f59e42" },
+                { name: "Radiation", value: 2, color: "#10b981" },
+                { name: "Cell Culture", value: 1, color: "#ef4444" }
+              ]}
+              cx="50%"
+              cy="50%"
+              outerRadius={70}
+              dataKey="value"
+              label={(entry) => entry.name}
+            >
+              {(categories.length > 0
+                ? categories.map((cat, idx) => ({ color: ["#6366f1", "#8b5cf6", "#f59e42", "#10b981", "#ef4444"][idx % 5] }))
+                : [
+                    { color: "#6366f1" },
+                    { color: "#8b5cf6" },
+                    { color: "#f59e42" },
+                    { color: "#10b981" },
+                    { color: "#ef4444" }
+                  ]
+              ).map((entry, index) => (
                 <Cell key={index} fill={entry.color} />
               ))}
             </Pie>
             <Tooltip contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151' }} />
           </PieChart>
         </ResponsiveContainer>
-      </div>
-    </div>
-    <div className="bg-gray-900 rounded-lg p-4">
-      <h4 className="text-sm font-medium text-gray-400 mb-4 flex items-center gap-2">
-        <Network className="w-4 h-4" />
-        Konu İlişki Haritası (Knowledge Graph)
-      </h4>
-      <div className="h-48 flex items-center justify-center border-2 border-dashed border-gray-700 rounded-lg">
-        <div className="text-center">
-          <Network className="w-12 h-12 text-gray-600 mx-auto mb-2" />
-          <p className="text-gray-500 text-sm">İnteraktif grafik yükleniyor...</p>
-        </div>
       </div>
     </div>
   </div>
