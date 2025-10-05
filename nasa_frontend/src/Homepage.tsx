@@ -4,8 +4,6 @@ import { Search, Filter, TrendingUp, MessageCircle, X, ChevronRight, Calendar, U
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
 
-const categories = ["microgravity", "tissue effects", "immune system", "cardiomyocytes", "cancer biology", "human health"];
-
 const trendData = [
   { year: 2020, articles: 45 },
   { year: 2021, articles: 62 },
@@ -307,9 +305,10 @@ const ArticleDetailPage = ({ article, onBack }) => {
 
 // Main Home Page
 const HomePage = ({ onArticleClick }) => {
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [articles, setArticles] = useState([]);
+  const [categories, setCategories] = useState([]);
 
   // Fetch all articles on mount
   useEffect(() => {
@@ -324,6 +323,33 @@ const HomePage = ({ onArticleClick }) => {
     };
     fetchArticles();
   }, []);
+
+  // Fetch categories (keywords) from backend
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch('http://127.0.0.1:8000/articles/keywords?limit=15');
+        const data = await response.json();
+        setCategories(data || []);
+      } catch (error) {
+        console.error('Error fetching keywords:', error);
+      }
+    };
+    fetchCategories();
+  }, []);
+
+  // Search keywords handler
+  // const handleKeywordSearch = async () => {
+  //   if (!searchQuery.trim()) return;
+  //   try {
+  //     const response = await fetch(`http://127.0.0.1:8000/articles/keywords?query=${encodeURIComponent(searchQuery.trim())}&limit=15`);
+  //     const data = await response.json();
+  //     setCategories(data.keywords || []);
+  //   } catch (error) {
+  //     console.error('Keyword search error:', error);
+  //     setCategories([]);
+  //   }
+  // };
 
   // Search handler
   const handleSearch = async () => {
@@ -371,11 +397,11 @@ const HomePage = ({ onArticleClick }) => {
         
         <div className="mb-12">
           <div className="flex flex-wrap gap-3 justify-center">
-            <button onClick={() => setSelectedCategory('all')} className={`px-6 py-2 rounded-full transition ${selectedCategory === 'all' ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-purple-500/50' : 'bg-gray-800 text-gray-300 hover:bg-gray-700 border border-gray-700 hover:shadow-[0_0_20px_5px_rgba(168,85,247,0.5)] focus:shadow-[0_0_20px_5px_rgba(168,85,247,0.7)]'}`}>
-              Tümü
+            <button onClick={() => setSelectedCategory(null)} className={`px-6 py-2 rounded-full transition ${selectedCategory === 'all' ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-purple-500/50' : 'bg-gray-800 text-gray-300 hover:bg-gray-700 border border-gray-700 hover:shadow-[0_0_20px_5px_rgba(168,85,247,0.5)] focus:shadow-[0_0_20px_5px_rgba(168,85,247,0.7)]'}`}>
+              All
             </button>
-            {categories.map((cat) => (
-              <button key={cat} onClick={() => setSelectedCategory(cat)} className={`px-6 py-2 rounded-full transition capitalize ${selectedCategory === cat ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-purple-500/50' : 'bg-gray-800 text-gray-300 hover:bg-gray-700 border border-gray-700 hover:shadow-[0_0_20px_5px_rgba(168,85,247,0.5)] focus:shadow-[0_0_20px_5px_rgba(168,85,247,0.7)]'}`}>
+            {categories?.map((cat, idx) => (
+              <button key={idx} onClick={() => setSelectedCategory(cat)} className={`px-6 py-2 rounded-full transition capitalize ${selectedCategory === cat ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-purple-500/50' : 'bg-gray-800 text-gray-300 hover:bg-gray-700 border border-gray-700 hover:shadow-[0_0_20px_5px_rgba(168,85,247,0.5)] focus:shadow-[0_0_20px_5px_rgba(168,85,247,0.7)]'}`}>
                 {cat}
               </button>
             ))}
