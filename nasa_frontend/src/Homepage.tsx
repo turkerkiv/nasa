@@ -3,24 +3,6 @@ import StarBackground from './StarBackground';
 import { Search, Filter, TrendingUp, MessageCircle, X, ChevronRight, Calendar, User, ExternalLink, FileText, BarChart3, Network, Sparkles, BookOpen, Quote, Send, ArrowLeft } from 'lucide-react';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
-
-const trendData = [
-  { year: 2020, articles: 45 },
-  { year: 2021, articles: 62 },
-  { year: 2022, articles: 78 },
-  { year: 2023, articles: 95 },
-  { year: 2024, articles: 112 }
-];
-
-const categoryData = [
-  { name: 'Microgravity', value: 35, color: '#3b82f6' },
-  { name: 'Tissue', value: 25, color: '#8b5cf6' },
-  { name: 'Immune', value: 20, color: '#ec4899' },
-  { name: 'Cardio', value: 15, color: '#10b981' },
-  { name: 'Cancer', value: 18, color: '#f59e0b' },
-  { name: 'Health', value: 22, color: '#ef4444' }
-];
-
 // Navbar Component
 const Navbar = () => (
   <nav className="bg-gray-900 border-b border-gray-800 px-6 py-4 sticky top-0 z-40 backdrop-blur-lg bg-gray-900/95">
@@ -77,73 +59,6 @@ const ReelsModal = ({ articles, open, onClose }) => {
     </div>
   );
 };
-const Chatbot = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState([
-    { type: 'bot', text: 'Hello! How can I assist you with NASA biology articles?' }
-  ]);
-  const [input, setInput] = useState('');
-
-  const handleSend = () => {
-    setMessages([...messages, { type: 'user', text: input }]);
-    setTimeout(() => {
-      setMessages(prev => [...prev, {
-        type: 'bot',
-        text: 'Sorunuzu aldım! Bu bir demo versiyonudur. Gerçek uygulamada AI asistanı devreye girecek.'
-      }]);
-    }, 1000);
-    setInput('');
-  };
-
-  return (
-    <>
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-6 left-6 bg-gradient-to-r from-blue-600 to-purple-600 text-white p-4 rounded-full shadow-2xl hover:shadow-blue-500/50 hover:scale-110 transition-all duration-300 z-50"
-      >
-        {isOpen ? <X className="w-6 h-6" /> : <MessageCircle className="w-6 h-6" />}
-      </button>
-
-      {isOpen && (
-        <div className="fixed bottom-24 left-6 w-96 h-[500px] bg-gray-800 border border-gray-700 rounded-xl shadow-2xl flex flex-col z-50">
-          <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-4 rounded-t-xl flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <MessageCircle className="w-5 h-5 text-white" />
-              <span className="font-semibold text-white">YazTek Research Assistant</span>
-            </div>
-            <button onClick={() => setIsOpen(false)} className="text-white hover:bg-white/20 p-1 rounded transition">
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-          
-          <div className="flex-1 p-4 overflow-y-auto space-y-3">
-            {messages.map((msg, idx) => (
-              <div key={idx} className={`rounded-lg p-3 ${msg.type === 'bot' ? 'bg-gray-700 text-gray-300' : 'bg-blue-600 text-white ml-8'}`}>
-                <p className="text-sm">{msg.text}</p>
-              </div>
-            ))}
-          </div>
-          
-          <div className="p-4 border-t border-gray-700">
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-                placeholder="Soru sorun..."
-                className="flex-1 px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
-              />
-              <button onClick={handleSend} className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg transition">
-                <Send className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </>
-  );
-};
 
 // Article Card
 const ArticleCard = ({ article, onClick }) => (
@@ -179,7 +94,7 @@ const ArticleCard = ({ article, onClick }) => (
 );
 
 // Graph Panel
-const GraphPanel = () => (
+const GraphPanel = ({ trendData, categories }) => (
   <div className="bg-gray-800 border border-gray-700 rounded-xl p-6">
     <h3 className="text-xl font-semibold text-white mb-6 flex items-center gap-2">
       <BarChart3 className="w-6 h-6 text-blue-500" />
@@ -194,7 +109,7 @@ const GraphPanel = () => (
             <XAxis dataKey="year" stroke="#9ca3af" />
             <YAxis stroke="#9ca3af" />
             <Tooltip contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151' }} labelStyle={{ color: '#fff' }} />
-            <Line type="monotone" dataKey="articles" stroke="#3b82f6" strokeWidth={3} dot={{ fill: '#3b82f6', r: 5 }} />
+            <Line type="monotone" dataKey="count" stroke="#3b82f6" strokeWidth={3} dot={{ fill: '#3b82f6', r: 5 }} />
           </LineChart>
         </ResponsiveContainer>
       </div>
@@ -202,8 +117,8 @@ const GraphPanel = () => (
         <h4 className="text-sm font-medium text-gray-400 mb-4">Kategori Dağılımı</h4>
         <ResponsiveContainer width="100%" height={200}>
           <PieChart>
-            <Pie data={categoryData} cx="50%" cy="50%" outerRadius={70} dataKey="value" label={(entry) => entry.name}>
-              {categoryData.map((entry, index) => (
+            <Pie data={categories} cx="50%" cy="50%" outerRadius={70} dataKey="value" label={(entry) => entry.name}>
+              {categories.map((entry, index) => (
                 <Cell key={index} fill={entry.color} />
               ))}
             </Pie>
@@ -230,7 +145,38 @@ const GraphPanel = () => (
 // Article Detail Page
 const ArticleDetailPage = ({ article, onBack }) => {
   const [activeTab, setActiveTab] = useState('abstract');
-  // Benzer makaleler özelliği kaldırıldı (backendde yok)
+
+  // Chatbot for article detail
+  const [chatOpen, setChatOpen] = useState(false);
+  const [chatMessages, setChatMessages] = useState([
+    { type: 'bot', text: 'Bu makale ile ilgili sorularınızı sorabilirsiniz.' }
+  ]);
+  const [chatInput, setChatInput] = useState('');
+  const [chatLoading, setChatLoading] = useState(false);
+
+  const handleChatSend = async () => {
+    if (!chatInput.trim()) return;
+    setChatMessages([...chatMessages, { type: 'user', text: chatInput }]);
+    setChatLoading(true);
+    try {
+      const response = await fetch('http://127.0.0.1:8001/articles/chatbot/', {
+        method: 'POST',
+        headers: {
+          'accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ article_id: article.id, message: chatInput })
+      });
+      const data = await response.json();
+      console.log(data, article)
+      setChatMessages(prev => [...prev, { type: 'bot', text: data.answer || 'Yanıt alınamadı.' }]);
+    } catch (error) {
+      setChatMessages(prev => [...prev, { type: 'bot', text: 'Sunucuya bağlanılamadı.' }]);
+    }
+    setChatInput('');
+    setChatLoading(false);
+  };
+
   return (
     <div className="min-h-screen bg-gray-900">
       <div className="max-w-7xl mx-auto px-6 py-8">
@@ -296,6 +242,49 @@ const ArticleDetailPage = ({ article, onBack }) => {
                 )}
               </div>
             </div>
+            {/* Article Chatbot Floating Button & Modal (moved to right) */}
+            <button
+              onClick={() => setChatOpen(!chatOpen)}
+              className="fixed bottom-6 right-6 bg-gradient-to-r from-blue-600 to-purple-600 text-white p-4 rounded-full shadow-2xl hover:shadow-blue-500/50 hover:scale-110 transition-all duration-300 z-50"
+            >
+              {chatOpen ? <X className="w-6 h-6" /> : <MessageCircle className="w-6 h-6" />}
+            </button>
+            {chatOpen && (
+              <div className="fixed bottom-24 right-6 w-96 h-[500px] bg-gray-800 border border-gray-700 rounded-xl shadow-2xl flex flex-col z-50">
+                <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-4 rounded-t-xl flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <MessageCircle className="w-5 h-5 text-white" />
+                    <span className="font-semibold text-white">Makale Asistanı</span>
+                  </div>
+                  <button onClick={() => setChatOpen(false)} className="text-white hover:bg-white/20 p-1 rounded transition">
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+                <div className="flex-1 p-4 overflow-y-auto space-y-3">
+                  {chatMessages.map((msg, idx) => (
+                    <div key={idx} className={`rounded-lg p-3 ${msg.type === 'bot' ? 'bg-gray-700 text-gray-300' : 'bg-blue-600 text-white ml-8'}`}>
+                      <p className="text-sm">{msg.text}</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="p-4 border-t border-gray-700">
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={chatInput}
+                      onChange={(e) => setChatInput(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleChatSend()}
+                      placeholder="Makale ile ilgili soru sorun..."
+                      className="flex-1 px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
+                      disabled={chatLoading}
+                    />
+                    <button onClick={handleChatSend} className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg transition" disabled={chatLoading}>
+                      {chatLoading ? <span className="animate-spin">...</span> : <Send className="w-5 h-5" />}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -308,6 +297,7 @@ const HomePage = ({ onArticleClick }) => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [trendArticles, setTrendArticles] = useState([]);
+  const [trendData, setTrendData] = useState<{ year: number, count: number }[]>([]);
   const [resultArticles, setResultArticles] = useState<[]>([]);
   const [categories, setCategories] = useState([]);
   const [isAll, setIsAll] = useState(true);
@@ -315,7 +305,7 @@ const HomePage = ({ onArticleClick }) => {
   const [pageSize] = useState(3);
   const [total, setTotal] = useState(0);
 
-  // Fetch trend articles on mount
+  // Fetch trend articles and yearly trend data on mount
   useEffect(() => {
     const fetchArticles = async () => {
       try {
@@ -327,6 +317,19 @@ const HomePage = ({ onArticleClick }) => {
       }
     };
     fetchArticles();
+
+    // Fetch yearly counts for trend graph
+    const fetchTrendData = async () => {
+      try {
+        const response = await fetch('http://127.0.0.1:8001/articles/counts-by-year');
+        const data = await response.json();
+        setTrendData(data);
+        console.log('Yearly trend data:', data);
+      } catch (error) {
+        console.error('Error fetching yearly trend data:', error);
+      }
+    };
+    fetchTrendData();
   }, []);
 
   useEffect(() => {
@@ -482,7 +485,7 @@ const HomePage = ({ onArticleClick }) => {
         </div>
 
         <div className="mb-12">
-          <GraphPanel />
+          <GraphPanel trendData={trendData} categories={categories} />
         </div>
       </div>
     </div>
@@ -529,7 +532,7 @@ export default function App() {
       {currentPage === 'detail' && selectedArticle && (
         <ArticleDetailPage article={selectedArticle} onBack={handleBackToHome} />
       )}
-      <Chatbot />
+      {/* Chatbot removed from homepage, now only in ArticleDetailPage */}
     </>
   );
 }
