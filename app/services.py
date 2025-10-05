@@ -96,7 +96,11 @@ class ArticleService:
         self.articleRepo = ArticleRepository(db)
 
     async def get_all(
-        self, page: int = 1, page_size: int = 10, query: str | None = None
+        self,
+        page: int = 1,
+        page_size: int = 10,
+        query: str | None = None,
+        keyword: str | None = None,
     ) -> PaginatedArticles:
         if page < 1:
             page = 1
@@ -105,7 +109,7 @@ class ArticleService:
 
         offset = (page - 1) * page_size
         items, total = await self.articleRepo.get_all(
-            limit=page_size, offset=offset, search=query
+            limit=page_size, offset=offset, search=query, keyword=keyword
         )
 
         pydantic_items: List[ArticleListItem] = []

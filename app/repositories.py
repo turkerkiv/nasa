@@ -13,19 +13,30 @@ class ArticleRepository:
         limit: int | None = None,
         offset: int | None = None,
         search: str | None = None,
+        keyword: str | None = None,
     ):
-        # total count
-        total_result = await self.db.execute(select(ArticleORM))
-        total = len(total_result.scalars().all())
-
-        query = select(ArticleORM)
+        """
+        Return items and total count, supports optional `search` (title/abstract)
+        and `keyword` filter (substring match against ArticleORM.keywords).
+        """
+        # build base query with filters
+        base_query = select(ArticleORM)
 
         if search is not None:
-            query = query.where(
+            base_query = base_query.where(
                 ArticleORM.title.ilike(f"%{search}%")
                 | ArticleORM.abstract.ilike(f"%{search}%")
             )
 
+        if keyword is not None:
+            # simple substring match; keywords are stored as comma/semicolon separated string
+            base_query = base_query.where(ArticleORM.keywords.ilike(f"%{keyword}%"))
+
+        # compute total before applying limit/offset
+        total_result = await self.db.execute(base_query)
+        total = len(total_result.scalars().all())
+
+        query = base_query
         if limit is not None:
             query = query.limit(limit)
         if offset is not None:

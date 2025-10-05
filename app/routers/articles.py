@@ -21,9 +21,12 @@ async def read_articles(
     page: int = 1,
     page_size: int = 10,
     query: str | None = None,
+    keyword: str | None = None,
     service: services.ArticleService = Depends(get_service),
 ):
-    return await service.get_all(page=page, page_size=page_size, query=query)
+    return await service.get_all(
+        page=page, page_size=page_size, query=query, keyword=keyword
+    )
 
 
 @router.get("/pdf/{filename}")
