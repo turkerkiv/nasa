@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import List
 from app.schemas import YearCount
 from app.schemas import YearTrending, ArticleListItem
+from app.schemas import PillInfo
 
 router = APIRouter(prefix="/articles", tags=["articles"])
 
@@ -127,3 +128,16 @@ async def read_article_detail(
     if article is None:
         raise HTTPException(status_code=404, detail="Article not found")
     return article
+
+
+@router.get("/{article_id}/pill_info", response_model=PillInfo)
+async def get_pill_info(
+    article_id: int, service: services.ArticleService = Depends(get_service)
+):
+    """
+    Return the structured pill_info record for the given article id.
+    """
+    info = await service.get_pill_info(article_id)
+    if info is None:
+        raise HTTPException(status_code=404, detail="Pill info not found for article")
+    return info

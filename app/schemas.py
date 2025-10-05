@@ -45,3 +45,17 @@ class YearCount(BaseModel):
 class YearTrending(BaseModel):
     year: int
     article: ArticleListItem
+
+
+class PillInfo(BaseModel):
+    id: int
+    article_id: int
+    study_subject: str | None = None
+    environment_type: str | None = None
+    duration: str | None = None
+    biological_focus: str | None = None
+    study_type: str | None = None
+    primary_finding: str | None = None
+    sample_info: str | None = None
+    intervention_treatment: str | None = None
+    statistical_evidence: bool | None = False
