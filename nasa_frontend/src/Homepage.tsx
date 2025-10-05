@@ -168,8 +168,8 @@ const ArticleDetailPage = ({ article, onBack }) => {
         body: JSON.stringify({ article_id: article.id, message: chatInput })
       });
       const data = await response.json();
-      console.log(data, article)
-      setChatMessages(prev => [...prev, { type: 'bot', text: data.answer || 'Yanıt alınamadı.' }]);
+      console.log(data)
+      setChatMessages(prev => [...prev, { type: 'bot', text: data.reply || 'Yanıt alınamadı.' }]);
     } catch (error) {
       setChatMessages(prev => [...prev, { type: 'bot', text: 'Sunucuya bağlanılamadı.' }]);
     }
