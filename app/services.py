@@ -155,6 +155,7 @@ class ArticleService:
             keywords=article.keywords,
             citation_count=article.citation_count,
             author_names=article.authors,
+            doi=article.doi,
         )
 
     async def get_popular_keywords(self, top_n: int = 10) -> list[str]:
