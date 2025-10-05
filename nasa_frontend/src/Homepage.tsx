@@ -147,7 +147,17 @@ const GraphPanel = ({ trendData, categories }) => (
 );
 
 // Article Detail Page
-const ArticleDetailPage = ({ article, onBack }) => {
+const ArticleDetailPage = ({ article, onBack, onArticleClick }) => {
+  // Similar articles state
+  const [similarArticles, setSimilarArticles] = useState([]);
+  useEffect(() => {
+    if (article?.id) {
+      fetch(`http://127.0.0.1:8001/articles/${article.id}/similar?limit=3`)
+        .then(res => res.json())
+        .then(data => setSimilarArticles(data || []))
+        .catch(() => setSimilarArticles([]));
+    }
+  }, [article?.id]);
   const [activeTab, setActiveTab] = useState('abstract');
 
   // Chatbot for article detail
@@ -209,7 +219,7 @@ const ArticleDetailPage = ({ article, onBack }) => {
                   <span>{article.citation_count} alıntı</span>
                 </div>
               </div>
-              <a href="#" className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 mb-8">
+              <a href={"/doi.org/"+article.doi} className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 mb-8">
                 <ExternalLink className="w-4 h-4" />
                 {article.doi}
               </a>
@@ -293,7 +303,25 @@ const ArticleDetailPage = ({ article, onBack }) => {
               </div>
             )}
           </div>
-        </div>
+          {/* Similar Articles - right side */}
+          <div className="hidden lg:block">
+            <div className="bg-gray-800 border border-gray-700 rounded-xl p-6">
+              <h4 className="text-lg font-bold text-blue-400 mb-4">Benzer Makaleler</h4>
+              <div className="space-y-4">
+                {similarArticles.length === 0 && (
+                  <p className="text-gray-400">Benzer makale bulunamadı.</p>
+                )}
+                {similarArticles.map((sim) => (
+                  <div onClick={() => onArticleClick(sim)} key={sim.id} className="bg-gray-900 rounded-lg p-4 border border-gray-700 hover:border-blue-400 transition cursor-pointer">
+                    <h5 className="text-md font-semibold text-white mb-2">{sim.title}</h5>
+                    <p className="text-gray-400 text-sm mb-2">{sim.author_names}</p>
+                    <p className="text-gray-500 text-xs">{sim.publication_date?.slice(0, 10)}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          </div>
       </div>
     </div>
   );
@@ -559,7 +587,7 @@ export default function App() {
       <Navbar />
       {currentPage === 'home' && <HomePage onArticleClick={handleArticleClick} />}
       {currentPage === 'detail' && selectedArticle && (
-        <ArticleDetailPage article={selectedArticle} onBack={handleBackToHome} />
+        <ArticleDetailPage article={selectedArticle} onBack={handleBackToHome} onArticleClick={handleArticleClick} />
       )}
       {/* Chatbot removed from homepage, now only in ArticleDetailPage */}
     </>
