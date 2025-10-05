@@ -311,6 +311,9 @@ const HomePage = ({ onArticleClick }) => {
   const [resultArticles, setResultArticles] = useState<[]>([]);
   const [categories, setCategories] = useState([]);
   const [isAll, setIsAll] = useState(true);
+  const [page, setPage] = useState(1);
+  const [pageSize] = useState(3);
+  const [total, setTotal] = useState(0);
 
   // Fetch trend articles on mount
   useEffect(() => {
@@ -326,18 +329,19 @@ const HomePage = ({ onArticleClick }) => {
     fetchArticles();
   }, []);
 
-   useEffect(() => {
+  useEffect(() => {
     const fetchArticles = async () => {
       try {
-        const response = await fetch(`http://127.0.0.1:8001/articles/?page=1&page_size=3&query=${encodeURIComponent(searchQuery)}`);
+        const response = await fetch(`http://127.0.0.1:8001/articles/?page=${page}&page_size=${pageSize}&query=${encodeURIComponent(searchQuery)}`);
         const data = await response.json();
         setResultArticles(data.items);
+        setTotal(data.total);
       } catch (error) {
         console.error('Error fetching articles:', error);
       }
     };
     fetchArticles();
-  }, []);
+  }, [page, isAll]);
 
   // Fetch categories (keywords) from backend
   useEffect(() => {
@@ -368,10 +372,12 @@ const HomePage = ({ onArticleClick }) => {
 
   // Search handler
   const handleSearch = async () => {
+    setPage(1);
     try {
       const response = await fetch(`http://127.0.0.1:8001/articles/?page=1&page_size=3&query=${encodeURIComponent(searchQuery)}`);
       const data = await response.json();
       setResultArticles(data.items);
+      setTotal(data.total);
       if (searchQuery.trim() === '') {
         setIsAll(true);
       } else {
@@ -396,7 +402,7 @@ const HomePage = ({ onArticleClick }) => {
           <h2 className="text-4xl font-bold text-white mb-4">NASA Biology Research</h2>
           <p className="text-gray-400 text-lg">Discover the latest scientific articles in space biology</p>
         </div>
-        
+
         <div className="mb-8">
           <div className="relative max-w-3xl mx-auto">
             <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -414,7 +420,7 @@ const HomePage = ({ onArticleClick }) => {
             />
           </div>
         </div>
-        
+
         <div className="mb-12">
           <div className="flex flex-wrap gap-3 justify-center">
             {categories?.map((cat, idx) => (
@@ -425,10 +431,36 @@ const HomePage = ({ onArticleClick }) => {
           </div>
         </div>
 
-    <div className="mb-12">
-          <div className="flex items-center gap-2 mb-6">
+        
+
+        <div className="mb-12">
+          <div className="flex items-baseline justify-between gap-2 mb-6">
+            <div className='flex items-center gap-2'>
             <TrendingUp className="w-6 h-6 text-orange-500" />
             <h3 className="text-xl font-semibold text-white">{isAll ? "All" : "Results"}</h3>
+            </div>
+            {/* Pagination Controls - Arrow, Current, Last */}
+          <div className="mb-4 flex justify-center items-center gap-4">
+          <button
+            className="px-3 py-2 rounded-lg bg-gray-700 text-white disabled:opacity-40 flex items-center"
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={page === 1}
+            aria-label="Previous page"
+          >
+            <ChevronRight className="w-5 h-5 rotate-180" />
+          </button>
+          <span className="text-white font-semibold text-lg">
+            {page} / {Math.max(1, Math.ceil(total / pageSize))}
+          </span>
+          <button
+            className="px-3 py-2 rounded-lg bg-gray-700 text-white disabled:opacity-40 flex items-center"
+            onClick={() => setPage((p) => Math.min(Math.ceil(total / pageSize), p + 1))}
+            disabled={page === Math.ceil(total / pageSize) || total === 0}
+            aria-label="Next page"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+        </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {resultArticles?.map((article) => (
@@ -448,7 +480,7 @@ const HomePage = ({ onArticleClick }) => {
             ))}
           </div>
         </div>
-        
+
         <div className="mb-12">
           <GraphPanel />
         </div>
