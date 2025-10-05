@@ -2,7 +2,7 @@ from typing import List
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.repositories import ArticleRepository
 from app.schemas import ArticleListItem, PaginatedArticles
-from app.schemas import ArticleBase
+from app.schemas import ArticleBase, YearCount
 from pathlib import Path
 import asyncio
 
@@ -153,3 +153,10 @@ class ArticleService:
         common = await self.articleRepo.get_top_keywords(top_n=top_n)
         # common is list of (keyword, count)
         return [k for k, _ in common]
+
+    async def get_article_counts_by_year(self) -> list[YearCount]:
+        """
+        Return list of YearCount objects (year, count), sorted by year descending.
+        """
+        pairs = await self.articleRepo.get_counts_by_year()
+        return [YearCount(year=int(y), count=int(c)) for y, c in pairs]

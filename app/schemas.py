@@ -35,3 +35,8 @@ class PaginatedArticles(BaseModel):
 class ChatRequest(BaseModel):
     article_id: int
     message: str
+
+
+class YearCount(BaseModel):
+    year: int
+    count: int

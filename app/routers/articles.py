@@ -6,6 +6,7 @@ from app.schemas import PaginatedArticles
 from fastapi.responses import FileResponse
 from pathlib import Path
 from typing import List
+from app.schemas import YearCount
 
 router = APIRouter(prefix="/articles", tags=["articles"])
 
@@ -54,6 +55,17 @@ async def get_popular_keywords(
         limit = 100
     kws = await service.get_popular_keywords(top_n=limit)
     return kws
+
+
+@router.get("/counts-by-year", response_model=List[YearCount])
+async def get_counts_by_year(service: services.ArticleService = Depends(get_service)):
+    """
+    Return a list of years and the number of articles published in each year.
+    Sorted by year descending.
+    """
+    pairs = await service.get_article_counts_by_year()
+    # service already returns list[dict] with year/count
+    return pairs
 
 
 @router.get("/{article_id}", response_model=services.ArticleBase)
