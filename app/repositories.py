@@ -46,3 +46,35 @@ class ArticleRepository:
         await self.db.commit()
         await self.db.refresh(article)
         return article
+
+    async def get_top_keywords(self, top_n: int = 10) -> list[tuple[str, int]]:
+        """
+        Aggregate keywords from all articles and return a list of (keyword, count)
+        sorted by count desc. The ArticleORM.keywords field is stored as a
+        delimiter-separated string (commas or semicolons). This method normalizes
+        keywords to lower-case and strips whitespace.
+        """
+        result = await self.db.execute(select(ArticleORM))
+        items = result.scalars().all()
+
+        from collections import Counter
+
+        counter: Counter[str] = Counter()
+
+        for a in items:
+            kws = a.keywords or ""
+            # split on common delimiters
+            parts = []
+            for part in kws.split(","):
+                # further split by semicolon if present
+                subparts = part.split(";") if ";" in part else [part]
+                parts.extend(subparts)
+
+            for k in parts:
+                k_clean = k.strip().lower()
+                if not k_clean:
+                    continue
+                counter[k_clean] += 1
+
+        most_common = counter.most_common(top_n)
+        return most_common

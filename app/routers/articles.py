@@ -5,6 +5,7 @@ from app import database
 from app.schemas import PaginatedArticles
 from fastapi.responses import FileResponse
 from pathlib import Path
+from typing import List
 
 router = APIRouter(prefix="/articles", tags=["articles"])
 
@@ -38,6 +39,21 @@ async def get_article_file(filename: str):
         headers={"Content-Disposition": f'inline; filename="{requested.name}"'},
         media_type="application/pdf",
     )
+
+
+@router.get("/keywords", response_model=List[str])
+async def get_popular_keywords(
+    limit: int = 15, service: services.ArticleService = Depends(get_service)
+):
+    """
+    Return the top `limit` popular keywords across all articles. Defaults to 15.
+    """
+    if limit < 1:
+        limit = 15
+    if limit > 100:
+        limit = 100
+    kws = await service.get_popular_keywords(top_n=limit)
+    return kws
 
 
 @router.get("/{article_id}", response_model=services.ArticleBase)

@@ -144,3 +144,12 @@ class ArticleService:
             citation_count=article.citation_count,
             author_names=article.authors,
         )
+
+    async def get_popular_keywords(self, top_n: int = 10) -> list[str]:
+        """
+        Return the top N popular keywords across articles as a list of strings
+        ordered by frequency descending.
+        """
+        common = await self.articleRepo.get_top_keywords(top_n=top_n)
+        # common is list of (keyword, count)
+        return [k for k, _ in common]
