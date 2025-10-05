@@ -446,11 +446,19 @@ const HomePage = ({ onArticleClick }) => {
 
         <div className="mb-12">
           <div className="flex flex-wrap gap-3 justify-center">
-            {categories?.map((cat, idx) => (
-              <button key={idx} onClick={() => setSelectedCategory(cat)} className={`px-6 py-2 rounded-full transition capitalize ${selectedCategory === cat ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-purple-500/50' : 'bg-gray-800 text-gray-300 hover:bg-gray-700 border border-gray-700 hover:shadow-[0_0_20px_5px_rgba(168,85,247,0.5)] focus:shadow-[0_0_20px_5px_rgba(168,85,247,0.7)]'}`}>
-                {cat}
-              </button>
-            ))}
+              {categories?.map((cat, idx) => (
+                <button
+                  key={idx}
+                  onClick={async () => {
+                    setSelectedCategory(cat);
+                    setSearchQuery(cat);
+                    await handleSearch();
+                  }}
+                  className={`px-6 py-2 rounded-full transition capitalize ${selectedCategory === cat ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-purple-500/50' : 'bg-gray-800 text-gray-300 hover:bg-gray-700 border border-gray-700 hover:shadow-[0_0_20px_5px_rgba(168,85,247,0.5)] focus:shadow-[0_0_20px_5px_rgba(168,85,247,0.7)]'}`}
+                >
+                  {cat}
+                </button>
+              ))}
           </div>
         </div>
 
