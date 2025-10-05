@@ -3,6 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.repositories import ArticleRepository
 from app.schemas import ArticleListItem, PaginatedArticles
 from app.schemas import ArticleBase, YearCount
+from app.schemas import YearTrending
 from pathlib import Path
 import asyncio
 
@@ -160,3 +161,31 @@ class ArticleService:
         """
         pairs = await self.articleRepo.get_counts_by_year()
         return [YearCount(year=int(y), count=int(c)) for y, c in pairs]
+
+    async def get_trending_articles(
+        self, years: int = 3, min_citations: int = 7, min_percentile: float = 0.5
+    ) -> list[YearTrending]:
+        """
+        Return a list of YearTrending objects for the most recent `years` years.
+        Each YearTrending contains the year and a lightweight ArticleListItem for the top-cited article.
+        """
+        pairs = await self.articleRepo.get_trending_articles_by_recent_years(
+            years=years, min_citations=min_citations, min_percentile=min_percentile
+        )
+        results: list[YearTrending] = []
+        for y, a in pairs:
+            item = ArticleListItem(
+                id=a.id,
+                title=a.title,
+                publication_date=a.publication_date,
+                citation_count=a.citation_count,
+                abstract_compressed=(
+                    (a.abstract[:50] + "...")
+                    if a.abstract and len(a.abstract) > 50
+                    else a.abstract or ""
+                ),
+                keywords=a.keywords,
+                author_names=a.authors,
+            )
+            results.append(YearTrending(year=int(y), article=item))
+        return results
