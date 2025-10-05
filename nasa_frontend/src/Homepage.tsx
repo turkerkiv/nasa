@@ -5,6 +5,7 @@ import ExperimentsPreview from './ExperimentsPreview';
 import KnowledgeGraphPreview from './KnowledgeGraphPreview';
 import ArticleReels from './ArticleReels';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import KnowledgeGraphCards from './KnowledgeGraphCards';
 
 // Navbar Component
 const Navbar = () => (
@@ -215,7 +216,7 @@ const ArticleDetailPage = ({ article, onBack }) => {
               <div className="border-b border-gray-700 mb-6">
                 <div className="flex gap-4">
                   {['abstract', 'knowledge', 'pdf', 'experiments'].map((tab) => (
-                    <button key={tab} onClick={() => setActiveTab(tab)} className={`pb-3 px-2 capitalize transition ${activeTab === tab ? 'text-blue-400 border-b-2 border-blue-400 shadow-[0_0_20px_5px_rgba(168,85,247,0.5)]' : 'text-gray-400 hover:text-white hover:shadow-[0_0_20px_5px_rgba(168,85,247,0.3)] focus:shadow-[0_0_20px_5px_rgba(168,85,247,0.5)]'}`}>
+                    <button key={tab} onClick={() => setActiveTab(tab)} className={`p-2 rounded capitalize transition ${activeTab === tab ? 'text-blue-400 border-b-2 border-blue-400 shadow-[0_0_20px_5px_rgba(168,85,247,0.5)]' : 'text-gray-400 hover:text-white hover:shadow-[0_0_20px_5px_rgba(168,85,247,0.3)] focus:shadow-[0_0_20px_5px_rgba(168,85,247,0.5)]'}`}>
                       {tab === 'abstract' && 'Özet'}
                       {tab === 'knowledge' && 'Bilgi Grafiği'}
                       {tab === 'pdf' && 'PDF'}
@@ -226,7 +227,7 @@ const ArticleDetailPage = ({ article, onBack }) => {
               </div>
               <div className="text-gray-300 leading-relaxed">
                 {activeTab === 'abstract' && <p>{article.abstract}</p>}
-                {activeTab === 'knowledge' && <KnowledgeGraphPreview />}
+                {activeTab === 'knowledge' && <KnowledgeGraphCards />}
                 {activeTab === 'pdf' && (
                   <div className="h-96 bg-gray-900 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-700">
                     {article.id ? (
@@ -407,12 +408,12 @@ const HomePage = ({ onArticleClick }) => {
 
   return (
     <div className="min-h-screen bg-gray-900">
-      {/* Keşfet Button */}
+      {/* Explore Button */}
       <button
         className="fixed top-6 right-8 z-50 px-5 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full shadow-lg hover:scale-105 transition-all font-semibold border border-purple-500/30"
         onClick={() => setReelsOpen(true)}
       >
-        Keşfet
+        Explore
       </button>
       {reelsOpen && (
         <ArticleReels

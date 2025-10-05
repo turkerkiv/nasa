@@ -2,7 +2,18 @@ import React, { useState, useEffect, useRef } from 'react';
 import { ChevronUp, ChevronDown, Quote, User, Calendar, X } from 'lucide-react';
 
 const ArticleReels = ({ onArticleClick, onClose }) => {
-  const [articles, setArticles] = useState([]);
+  // Article type for random articles
+  type Article = {
+    id: number;
+    title: string;
+    abstract?: string;
+    keywords?: string;
+    author_names?: string;
+    publication_date?: string;
+    citation_count?: number;
+    summary?: string;
+  };
+  const [articles, setArticles] = useState<Article[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
@@ -13,41 +24,13 @@ const ArticleReels = ({ onArticleClick, onClose }) => {
     const fetchArticles = async () => {
       try {
         setLoading(true);
-        const response = await fetch('http://localhost:8000/articles/');
+        // Only use random articles endpoint for Keşfet
+        const response = await fetch('http://127.0.0.1:8001/articles?israndom=true');
         const data = await response.json();
-        setArticles(data.items || []);
+        setArticles(Array.isArray(data.items) ? data.items : []);
       } catch (error) {
-        console.error('Error fetching articles:', error);
-        // Fallback örnek veriler
-        setArticles([
-          {
-            id: 1,
-            title: "Microgravity Effects on Human Cardiac Tissue",
-            abstract: "Recent studies have shown that prolonged exposure to microgravity environments significantly impacts cardiovascular function. Our research demonstrates cellular-level changes in cardiac tissue, including alterations in calcium handling and mitochondrial function.",
-            keywords: "Microgravity",
-            author_names: "Smith J., Johnson M.",
-            publication_date: "2024-03-15",
-            citation_count: 45
-          },
-          {
-            id: 2,
-            title: "Immune System Response in Space Environment",
-            abstract: "The immune system undergoes significant modifications during spaceflight. We observed decreased T-cell functionality and altered cytokine production in astronauts during extended missions.",
-            keywords: "Immune System",
-            author_names: "Chen L., Anderson K.",
-            publication_date: "2024-02-20",
-            citation_count: 38
-          },
-          {
-            id: 3,
-            title: "Tissue Engineering in Low-Gravity Conditions",
-            abstract: "Novel approaches to tissue engineering in microgravity reveal unexpected benefits. Three-dimensional tissue constructs show improved organization and vascularization in space conditions.",
-            keywords: "Tissue Effects",
-            author_names: "Patel R., Thompson E.",
-            publication_date: "2024-01-10",
-            citation_count: 52
-          }
-        ]);
+        console.error('Error fetching random articles:', error);
+        setArticles([]);
       } finally {
         setLoading(false);
       }
@@ -194,8 +177,7 @@ const ArticleReels = ({ onArticleClick, onClose }) => {
                 <div className="flex-1 flex items-center overflow-y-auto my-6">
                   <div className="bg-black/40 backdrop-blur-md rounded-xl p-5 border border-purple-500/20 shadow-lg">
                     <p className="text-gray-200 text-lg leading-relaxed">
-                      {article.abstract?.slice(0, 300) || 'No abstract available'}
-                      {article.abstract?.length > 300 && '...'}
+                      {article.abstract_compressed}
                     </p>
                   </div>
                 </div>
