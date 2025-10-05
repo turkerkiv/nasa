@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import StarBackground from './StarBackground';
 import { Search, Filter, TrendingUp, MessageCircle, X, ChevronRight, Calendar, User, ExternalLink, FileText, BarChart3, Network, Sparkles, BookOpen, Quote, Send, ArrowLeft } from 'lucide-react';
+import ExperimentsPreview from './ExperimentsPreview';
+import KnowledgeGraphPreview from './KnowledgeGraphPreview';
+import ArticleReels from './ArticleReels';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
 // Navbar Component
@@ -104,7 +107,7 @@ const GraphPanel = ({ trendData, categories }) => (
       <div className="bg-gray-900 rounded-lg p-4">
         <h4 className="text-sm font-medium text-gray-400 mb-4">Yıllık Yayın Trendi</h4>
         <ResponsiveContainer width="100%" height={200}>
-          <LineChart data={trendData}>
+          <LineChart data={[...trendData].reverse()}>
             <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
             <XAxis dataKey="year" stroke="#9ca3af" />
             <YAxis stroke="#9ca3af" />
@@ -149,7 +152,7 @@ const ArticleDetailPage = ({ article, onBack }) => {
   // Chatbot for article detail
   const [chatOpen, setChatOpen] = useState(false);
   const [chatMessages, setChatMessages] = useState([
-    { type: 'bot', text: 'Bu makale ile ilgili sorularınızı sorabilirsiniz.' }
+    { type: 'bot', text: 'You can ask questions about this article.' }
   ]);
   const [chatInput, setChatInput] = useState('');
   const [chatLoading, setChatLoading] = useState(false);
@@ -211,35 +214,38 @@ const ArticleDetailPage = ({ article, onBack }) => {
               </a>
               <div className="border-b border-gray-700 mb-6">
                 <div className="flex gap-4">
-                  {['abstract', 'knowledge', 'pdf'].map((tab) => (
+                  {['abstract', 'knowledge', 'pdf', 'experiments'].map((tab) => (
                     <button key={tab} onClick={() => setActiveTab(tab)} className={`pb-3 px-2 capitalize transition ${activeTab === tab ? 'text-blue-400 border-b-2 border-blue-400 shadow-[0_0_20px_5px_rgba(168,85,247,0.5)]' : 'text-gray-400 hover:text-white hover:shadow-[0_0_20px_5px_rgba(168,85,247,0.3)] focus:shadow-[0_0_20px_5px_rgba(168,85,247,0.5)]'}`}>
                       {tab === 'abstract' && 'Özet'}
                       {tab === 'knowledge' && 'Bilgi Grafiği'}
                       {tab === 'pdf' && 'PDF'}
+                      {tab === 'experiments' && 'Deneyler'}
                     </button>
                   ))}
                 </div>
               </div>
               <div className="text-gray-300 leading-relaxed">
                 {activeTab === 'abstract' && <p>{article.abstract}</p>}
-                {activeTab === 'knowledge' && (
-                  <div className="flex flex-col items-center justify-center py-8">
-                    <h3 className="text-xl font-bold text-blue-400 mb-4">Bilgi Grafiği</h3>
-                    <div className="bg-gray-900 rounded-lg border border-blue-700 p-8 flex flex-col items-center justify-center w-full max-w-xl">
-                      <Network className="w-16 h-16 text-blue-400 mb-4" />
-                      <p className="text-gray-300 text-center mb-2">Makalenin ilişkili kavramları ve süreçleri gösteren bir bilgi grafiği burada yer alacak.</p>
-                      <p className="text-xs text-gray-500 text-center">(Gerçek grafik entegrasyonu için ek geliştirme gereklidir)</p>
-                    </div>
-                  </div>
-                )}
+                {activeTab === 'knowledge' && <KnowledgeGraphPreview />}
                 {activeTab === 'pdf' && (
                   <div className="h-96 bg-gray-900 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-700">
-                    <div className="text-center">
-                      <FileText className="w-16 h-16 text-gray-600 mx-auto mb-3" />
-                      <p className="text-gray-500">PDF Görüntüleyici ({article.file_name})</p>
-                    </div>
+                    {article.id ? (
+                      <iframe
+                        src={`http://127.0.0.1:8001/articles/pdf/${article.file_name}`}
+                        title="Makale PDF"
+                        width="100%"
+                        height="100%"
+                        className="rounded-lg border-none h-full w-full"
+                      />
+                    ) : (
+                      <div className="text-center">
+                        <FileText className="w-16 h-16 text-gray-600 mx-auto mb-3" />
+                        <p className="text-gray-500">PDF Görüntüleyici ({article.file_name})</p>
+                      </div>
+                    )}
                   </div>
                 )}
+                {activeTab === 'experiments' && <ExperimentsPreview />}
               </div>
             </div>
             {/* Article Chatbot Floating Button & Modal (moved to right) */}
@@ -254,7 +260,7 @@ const ArticleDetailPage = ({ article, onBack }) => {
                 <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-4 rounded-t-xl flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <MessageCircle className="w-5 h-5 text-white" />
-                    <span className="font-semibold text-white">Makale Asistanı</span>
+                    <span className="font-semibold text-white">YazTek Article Assistant</span>
                   </div>
                   <button onClick={() => setChatOpen(false)} className="text-white hover:bg-white/20 p-1 rounded transition">
                     <X className="w-5 h-5" />
@@ -274,7 +280,7 @@ const ArticleDetailPage = ({ article, onBack }) => {
                       value={chatInput}
                       onChange={(e) => setChatInput(e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && handleChatSend()}
-                      placeholder="Makale ile ilgili soru sorun..."
+                      placeholder="Ask a question about the article..."
                       className="flex-1 px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
                       disabled={chatLoading}
                     />
@@ -294,6 +300,7 @@ const ArticleDetailPage = ({ article, onBack }) => {
 
 // Main Home Page
 const HomePage = ({ onArticleClick }) => {
+  const [reelsOpen, setReelsOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [trendArticles, setTrendArticles] = useState([]);
@@ -400,6 +407,19 @@ const HomePage = ({ onArticleClick }) => {
 
   return (
     <div className="min-h-screen bg-gray-900">
+      {/* Keşfet Button */}
+      <button
+        className="fixed top-6 right-8 z-50 px-5 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full shadow-lg hover:scale-105 transition-all font-semibold border border-purple-500/30"
+        onClick={() => setReelsOpen(true)}
+      >
+        Keşfet
+      </button>
+      {reelsOpen && (
+        <ArticleReels
+          onArticleClick={onArticleClick}
+          onClose={() => setReelsOpen(false)}
+        />
+      )}
       <div className="max-w-7xl mx-auto px-6 py-12">
         <div className="text-center mb-12">
           <h2 className="text-4xl font-bold text-white mb-4">NASA Biology Research</h2>
