@@ -1,95 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import StarBackground from './StarBackground';
 import { Search, Filter, TrendingUp, MessageCircle, X, ChevronRight, Calendar, User, ExternalLink, FileText, BarChart3, Network, Sparkles, BookOpen, Quote, Send, ArrowLeft } from 'lucide-react';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
-// Mock Data
-const mockArticles = [
-  {
-    id: 1,
-    title: "Effects of Microgravity on Human Cardiac Tissue Development",
-    authors: "Johnson M., Smith K., Williams R.",
-    year: 2024,
-    category: "microgravity",
-    summary: "This study examines how microgravity conditions affect the development and function of human cardiac tissue using 3D bioprinting technology.",
-    doi: "10.1038/s41586-024-12345",
-    citations: 45,
-    abstract: "Microgravity environments present unique challenges for human physiology, particularly affecting cardiac tissue development. This comprehensive study utilized advanced 3D bioprinting techniques to create cardiac tissue models that were subsequently exposed to simulated microgravity conditions aboard the International Space Station.",
-    methodology: "We utilized state-of-the-art 3D bioprinting technology to create cardiac tissue models using human-induced pluripotent stem cells (hiPSCs). The tissue constructs were cultured in specialized bioreactors designed to simulate microgravity conditions.",
-    results: "Significant changes in gene expression related to cardiac development were observed in microgravity conditions. The tissue samples exhibited modified contractility patterns compared to Earth gravity controls, with a 23% reduction in force generation.",
-    similarArticles: [2, 3]
-  },
-  {
-    id: 2,
-    title: "Immune System Adaptation in Long-Duration Spaceflight",
-    authors: "Chen L., Rodriguez M., Patel S.",
-    year: 2023,
-    category: "immune system",
-    summary: "Analysis of immune system changes in astronauts during extended missions, revealing adaptive mechanisms and potential health risks.",
-    doi: "10.1126/science.2023.789",
-    citations: 67,
-    abstract: "Long-duration spaceflight poses significant challenges to the human immune system. This longitudinal study examines immune cell populations and functional changes in astronauts during six-month missions aboard the International Space Station.",
-    methodology: "Blood samples from 15 astronauts were collected at multiple time points: pre-flight, during flight, and post-flight. Comprehensive immune cell profiling was conducted using flow cytometry.",
-    results: "T-cell populations showed significant alterations during spaceflight, with a notable shift toward memory phenotypes. NK cell activity decreased by 35% during flight but recovered within 60 days post-mission.",
-    similarArticles: [1, 4]
-  },
-  {
-    id: 3,
-    title: "Cardiomyocyte Behavior Under Altered Gravity Conditions",
-    authors: "Anderson T., Lee J., Brown A.",
-    year: 2024,
-    category: "cardiomyocytes",
-    summary: "Investigation of cardiomyocyte morphology and electrical activity changes in response to various gravity levels.",
-    doi: "10.1016/j.cell.2024.456",
-    citations: 32,
-    abstract: "Cardiomyocytes, the contractile cells of the heart, are highly sensitive to mechanical stress and environmental conditions. This study investigates the morphological and functional changes that occur in cardiomyocytes when exposed to altered gravity conditions.",
-    methodology: "iPSC-derived cardiomyocytes were cultured in a rotating wall vessel bioreactor to simulate microgravity conditions. Electrophysiological recordings were obtained using patch-clamp techniques.",
-    results: "Cardiomyocytes exhibited significant changes in calcium handling and action potential duration under microgravity conditions. Structural remodeling was evident after 14 days.",
-    similarArticles: [1, 5]
-  },
-  {
-    id: 4,
-    title: "Cancer Cell Proliferation in Microgravity Environments",
-    authors: "Martinez E., Taylor D., Wilson H.",
-    year: 2023,
-    category: "cancer biology",
-    summary: "Study of cancer cell growth patterns and drug resistance mechanisms in simulated space conditions.",
-    doi: "10.1038/nature.2023.321",
-    citations: 54,
-    abstract: "Cancer cells exhibit unique behaviors in microgravity environments that may provide insights into tumor biology and therapeutic strategies.",
-    methodology: "Multiple cancer cell lines were cultured in 3D under simulated microgravity using clinostat rotation. Drug efficacy testing included common chemotherapeutic agents.",
-    results: "Cancer cells formed unique spheroid structures with altered drug sensitivity profiles. Some cell lines showed increased resistance to chemotherapy.",
-    similarArticles: [2, 6]
-  },
-  {
-    id: 5,
-    title: "Tissue Engineering Approaches for Space Medicine",
-    authors: "Kumar V., Zhang W., Roberts C.",
-    year: 2024,
-    category: "tissue effects",
-    summary: "Comprehensive review of tissue engineering technologies applicable to long-duration space missions and their medical applications.",
-    doi: "10.1016/j.biomaterials.2024.678",
-    citations: 41,
-    abstract: "Long-duration space missions require innovative medical solutions, including the ability to generate tissues and organs on-demand.",
-    methodology: "Literature review encompassing 250+ peer-reviewed publications on tissue engineering and space biology. Experimental validation of 3D bioprinting techniques suitable for microgravity environments.",
-    results: "Several promising approaches were identified for on-demand tissue fabrication in space. Challenges remain in maintaining tissue viability during long-term storage.",
-    similarArticles: [1, 3]
-  },
-  {
-    id: 6,
-    title: "Human Health Monitoring Systems for Deep Space Exploration",
-    authors: "Thompson R., Garcia F., Kim Y.",
-    year: 2023,
-    category: "human health",
-    summary: "Development of autonomous health monitoring technologies for astronauts during missions beyond low Earth orbit.",
-    doi: "10.1109/TBME.2023.901",
-    citations: 38,
-    abstract: "Deep space exploration missions require autonomous health monitoring systems capable of detecting and diagnosing medical conditions without immediate ground support.",
-    methodology: "Integration of multiple wearable sensors monitoring cardiovascular function, respiration, body temperature, and activity levels. AI-powered diagnostic algorithms were trained on astronaut health records.",
-    results: "The system successfully detected health anomalies in real-time simulations with 94% accuracy. Machine learning models identified early signs of cardiovascular stress and psychological distress.",
-    similarArticles: [2, 4]
-  }
-];
 
 const categories = ["microgravity", "tissue effects", "immune system", "cardiomyocytes", "cancer biology", "human health"];
 
@@ -244,7 +157,7 @@ const ArticleCard = ({ article, onClick }) => (
       </span>
       <span className="text-gray-400 text-sm flex items-center gap-1">
         <Quote className="w-3 h-3" />
-        {article.citations}
+        {article.citation_count}
       </span>
     </div>
     <h3 className="text-lg font-semibold text-white mb-2 group-hover:text-blue-400 transition line-clamp-2">
@@ -254,7 +167,7 @@ const ArticleCard = ({ article, onClick }) => (
     <div className="flex items-center justify-between text-sm mb-4">
       <div className="flex items-center gap-2 text-gray-500">
         <User className="w-4 h-4" />
-        <span className="truncate">{article.authors.split(',')[0]} et al.</span>
+        <span className="truncate">{article.authors?.split(',')[0]} et al.</span>
       </div>
       <div className="flex items-center gap-2 text-gray-500">
         <Calendar className="w-4 h-4" />
@@ -456,13 +369,39 @@ const ArticleDetailPage = ({ article, onBack }) => {
 const HomePage = ({ onArticleClick }) => {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [articles, setArticles] = useState([]);
 
-  const filteredArticles = mockArticles.filter((article) => {
-    const matchesCategory = selectedCategory === 'all' || article.category === selectedCategory;
-    const matchesSearch = article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         article.authors.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
-  });
+  // Fetch all articles on mount
+  useEffect(() => {
+    const fetchArticles = async () => {
+      try {
+        const response = await fetch('http://localhost:8000/articles/');
+        const data = await response.json();
+        setArticles(data.items);
+      } catch (error) {
+        console.error('Error fetching articles:', error);
+      }
+    };
+    fetchArticles();
+  }, []);
+
+  // Search handler
+  const handleSearch = async () => {
+    try {
+      const response = await fetch(`http://127.0.0.1:8000/articles/?page=1&page_size=10&query=${encodeURIComponent(searchQuery)}`);
+      const data = await response.json();
+      setArticles(data.items);
+    } catch (error) {
+      console.error('Error searching articles:', error);
+    }
+  };
+
+  // const filteredArticles = articles.filter((article) => {
+  //   const matchesCategory = selectedCategory === 'all' || article.category === selectedCategory;
+  //   const matchesSearch = article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  //                        article.authors.toLowerCase().includes(searchQuery.toLowerCase());
+  //   return matchesCategory && matchesSearch;
+  // });
 
   return (
     <div className="min-h-screen bg-gray-900">
@@ -479,6 +418,11 @@ const HomePage = ({ onArticleClick }) => {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleSearch();
+                }
+              }}
               placeholder="Makale ara... (başlık, yazar, anahtar kelime)"
               className="w-full pl-12 pr-4 py-4 bg-gray-800 border border-gray-700 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition"
             />
@@ -504,7 +448,7 @@ const HomePage = ({ onArticleClick }) => {
             <h3 className="text-xl font-semibold text-white">Trend ve Önerilen Makaleler</h3>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredArticles.slice(0, 3).map((article) => (
+            {articles?.map((article) => (
               <ArticleCard key={article.id} article={article} onClick={() => onArticleClick(article)} />
             ))}
           </div>
@@ -515,9 +459,9 @@ const HomePage = ({ onArticleClick }) => {
         </div>
         
         <div>
-          <h3 className="text-xl font-semibold text-white mb-6">Tüm Makaleler ({filteredArticles.length})</h3>
+          <h3 className="text-xl font-semibold text-white mb-6">Tüm Makaleler ({articles.length})</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredArticles.map((article) => (
+            {articles?.map((article) => (
               <ArticleCard key={article.id} article={article} onClick={() => onArticleClick(article)} />
             ))}
           </div>
