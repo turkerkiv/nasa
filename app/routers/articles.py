@@ -7,6 +7,7 @@ from fastapi.responses import FileResponse
 from pathlib import Path
 from typing import List
 from app.schemas import YearCount
+from app.schemas import YearTrending
 
 router = APIRouter(prefix="/articles", tags=["articles"])
 
@@ -66,6 +67,34 @@ async def get_counts_by_year(service: services.ArticleService = Depends(get_serv
     pairs = await service.get_article_counts_by_year()
     # service already returns list[dict] with year/count
     return pairs
+
+
+@router.get("/trending", response_model=List[YearTrending])
+async def get_trending_articles(
+    years: int = 3,
+    min_citations: int = 7,
+    min_percentile: float = 0.5,
+    service: services.ArticleService = Depends(get_service),
+):
+    """
+    Return trending articles for the most recent `years` years. For each year,
+    returns the top-cited article as an ArticleListItem. Default `years`=3.
+    """
+    if years < 1:
+        years = 3
+    if years > 10:
+        years = 10
+    if min_citations < 0:
+        min_citations = 0
+    if min_percentile < 0.0:
+        min_percentile = 0.0
+    if min_percentile > 1.0:
+        min_percentile = 1.0
+
+    trending = await service.get_trending_articles(
+        years=years, min_citations=min_citations, min_percentile=min_percentile
+    )
+    return trending
 
 
 @router.get("/{article_id}", response_model=services.ArticleBase)
