@@ -1,9 +1,13 @@
+
+import Homepage from "./Homepage";
+import "./globals.css";
+
 function App() {
-
-
-  return ( // en son dondurmen lazım
-    <h1>he</h1>
-  )
+  return (
+    <div className="App">
+      <Homepage />
+    </div>
+  );
 }
 
-export default App
+export default App;
