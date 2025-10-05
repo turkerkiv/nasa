@@ -1,6 +1,6 @@
 import asyncio
 from database import engine, Base
-from orm_models import ArticleORM, AuthorORM, ArticleAuthorORM
+from orm_models import ArticleORM
 
 print("Kayıtlı tablolar:", Base.metadata.tables.keys())
 
