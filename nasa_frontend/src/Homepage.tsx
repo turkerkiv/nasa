@@ -19,7 +19,7 @@ const Navbar = () => (
           <p className="text-xs text-gray-400">Smart Article Platform</p>
         </div>
       </div>
-      {/* Butonlar kaldırıldı */}
+  {/* Buttons removed */}
     </div>
   </nav>
 );
@@ -50,12 +50,12 @@ const ReelsModal = ({ articles, open, onClose }) => {
             className="px-3 py-1 bg-gray-700 text-white rounded-lg disabled:opacity-40"
             onClick={() => setCurrent(c => Math.max(0, c - 1))}
             disabled={current === 0}
-          >Önceki</button>
+          >Previous</button>
           <button
             className="px-3 py-1 bg-blue-600 text-white rounded-lg disabled:opacity-40"
             onClick={() => setCurrent(c => Math.min(articles.length - 1, c + 1))}
             disabled={current === articles.length - 1}
-          >Sonraki</button>
+          >Next</button>
         </div>
         <div className="mt-2 text-xs text-gray-400">{current + 1} / {articles.length}</div>
       </div>
@@ -99,13 +99,13 @@ const ArticleCard = ({ article, onClick }) => (
 // Graph Panel
 const GraphPanel = ({ trendData, categories }) => (
   <div className="bg-gray-800 border border-gray-700 rounded-xl p-6">
-    <h3 className="text-xl font-semibold text-white mb-6 flex items-center gap-2">
-      <BarChart3 className="w-6 h-6 text-blue-500" />
-      Analitik Gösterge Paneli
-    </h3>
+      <h3 className="text-xl font-semibold text-white mb-6 flex items-center gap-2">
+        <BarChart3 className="w-6 h-6 text-blue-500" />
+        Analytics Dashboard
+      </h3>
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
       <div className="bg-gray-900 rounded-lg p-4">
-        <h4 className="text-sm font-medium text-gray-400 mb-4">Yıllık Yayın Trendi</h4>
+  <h4 className="text-sm font-medium text-gray-400 mb-4">Yearly Publication Trend</h4>
         <ResponsiveContainer width="100%" height={200}>
           <LineChart data={[...trendData].reverse()}>
             <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
@@ -117,7 +117,7 @@ const GraphPanel = ({ trendData, categories }) => (
         </ResponsiveContainer>
       </div>
       <div className="bg-gray-900 rounded-lg p-4">
-        <h4 className="text-sm font-medium text-gray-400 mb-4">Kategori Dağılımı</h4>
+  <h4 className="text-sm font-medium text-gray-400 mb-4">Category Distribution</h4>
         <ResponsiveContainer width="100%" height={200}>
           <PieChart>
             <Pie
@@ -205,7 +205,7 @@ const ArticleDetailPage = ({ article, onBack, onArticleClick }) => {
       <div className="max-w-7xl mx-auto px-6 py-8">
         <button onClick={onBack} className="mb-6 flex items-center gap-2 text-gray-400 hover:text-white transition hover:shadow-[0_0_20px_5px_rgba(168,85,247,0.5)] focus:shadow-[0_0_20px_5px_rgba(168,85,247,0.7)]">
           <ArrowLeft className="w-5 h-5" />
-          Geri Dön
+          Go Back
         </button>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
@@ -225,7 +225,7 @@ const ArticleDetailPage = ({ article, onBack, onArticleClick }) => {
                 </div>
                 <div className="flex items-center gap-2">
                   <Quote className="w-4 h-4" />
-                  <span>{article.citation_count} alıntı</span>
+                  <span>{article.citation_count} citations</span>
                 </div>
               </div>
               <a
@@ -241,10 +241,10 @@ const ArticleDetailPage = ({ article, onBack, onArticleClick }) => {
                 <div className="flex gap-4">
                   {['abstract', 'knowledge', 'pdf', 'experiments'].map((tab) => (
                     <button key={tab} onClick={() => setActiveTab(tab)} className={`p-2 rounded capitalize transition ${activeTab === tab ? 'text-blue-400 border-b-2 border-blue-400 shadow-[0_0_20px_5px_rgba(168,85,247,0.5)]' : 'text-gray-400 hover:text-white hover:shadow-[0_0_20px_5px_rgba(168,85,247,0.3)] focus:shadow-[0_0_20px_5px_rgba(168,85,247,0.5)]'}`}>
-                      {tab === 'abstract' && 'Özet'}
-                      {tab === 'knowledge' && 'Bilgi Grafiği'}
+                      {tab === 'abstract' && 'Abstract'}
+                      {tab === 'knowledge' && 'Knowledge Graph'}
                       {tab === 'pdf' && 'PDF'}
-                      {tab === 'experiments' && 'Deneyler'}
+                      {tab === 'experiments' && 'Experiments'}
                     </button>
                   ))}
                 </div>
@@ -265,7 +265,7 @@ const ArticleDetailPage = ({ article, onBack, onArticleClick }) => {
                     ) : (
                       <div className="text-center">
                         <FileText className="w-16 h-16 text-gray-600 mx-auto mb-3" />
-                        <p className="text-gray-500">PDF Görüntüleyici ({article.file_name})</p>
+                        <p className="text-gray-500">PDF Viewer ({article.file_name})</p>
                       </div>
                     )}
                   </div>
@@ -320,10 +320,10 @@ const ArticleDetailPage = ({ article, onBack, onArticleClick }) => {
           {/* Similar Articles - right side */}
           <div className="hidden lg:block">
             <div className="bg-gray-800 border border-gray-700 rounded-xl p-6">
-              <h4 className="text-lg font-bold text-blue-400 mb-4">Benzer Makaleler</h4>
+              <h4 className="text-lg font-bold text-blue-400 mb-4">Similar Articles</h4>
               <div className="space-y-4">
                 {similarArticles.length === 0 && (
-                  <p className="text-gray-400">Benzer makale bulunamadı.</p>
+                  <p className="text-gray-400">No similar articles found.</p>
                 )}
                 {similarArticles.map((sim) => (
                   <div onClick={() => onArticleClick(sim)} key={sim.id} className="bg-gray-900 rounded-lg p-4 border border-gray-700 hover:border-blue-400 transition cursor-pointer">
