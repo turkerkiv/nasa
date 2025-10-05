@@ -366,7 +366,7 @@ const ArticleDetailPage = ({ article, onBack }) => {
                   {['abstract', 'knowledge', 'experiments', 'pdf'].map((tab) => (
                     <button key={tab} onClick={() => setActiveTab(tab)} className={`pb-3 px-2 capitalize transition ${activeTab === tab ? 'text-blue-400 border-b-2 border-blue-400 shadow-[0_0_20px_5px_rgba(168,85,247,0.5)]' : 'text-gray-400 hover:text-white hover:shadow-[0_0_20px_5px_rgba(168,85,247,0.3)] focus:shadow-[0_0_20px_5px_rgba(168,85,247,0.5)]'}`}>
                       {tab === 'abstract' && 'Özet'}
-                      {tab === 'knowledge' && 'Bilgi Grafikleri'}
+                      {tab === 'knowledge' && 'Bilgi Grafiği'}
                       {tab === 'experiments' && 'Deneyler'}
                       {tab === 'pdf' && 'PDF'}
                     </button>
