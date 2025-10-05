@@ -311,18 +311,18 @@ const HomePage = ({ onArticleClick }) => {
   const [categories, setCategories] = useState([]);
 
   // Fetch all articles on mount
-  useEffect(() => {
-    const fetchArticles = async () => {
-      try {
-        const response = await fetch('http://localhost:8000/articles/');
-        const data = await response.json();
-        setArticles(data.items);
-      } catch (error) {
-        console.error('Error fetching articles:', error);
-      }
-    };
-    fetchArticles();
-  }, []);
+  // useEffect(() => {
+  //   const fetchArticles = async () => {
+  //     try {
+  //       const response = await fetch('http://localhost:8000/articles/');
+  //       const data = await response.json();
+  //       setArticles(data.items);
+  //     } catch (error) {
+  //       console.error('Error fetching articles:', error);
+  //     }
+  //   };
+  //   fetchArticles();
+  // }, []);
 
   // Fetch categories (keywords) from backend
   useEffect(() => {
@@ -354,7 +354,7 @@ const HomePage = ({ onArticleClick }) => {
   // Search handler
   const handleSearch = async () => {
     try {
-      const response = await fetch(`http://127.0.0.1:8000/articles/?page=1&page_size=10&query=${encodeURIComponent(searchQuery)}`);
+      const response = await fetch(`http://127.0.0.1:8000/articles/?page=1&page_size=3&query=${encodeURIComponent(searchQuery)}`);
       const data = await response.json();
       setArticles(data.items);
     } catch (error) {
@@ -407,14 +407,27 @@ const HomePage = ({ onArticleClick }) => {
             ))}
           </div>
         </div>
-        
+
+        {articles.length > 0 && <div className="mb-12">
+          <div className="flex items-center gap-2 mb-6">
+            <TrendingUp className="w-6 h-6 text-orange-500" />
+            <h3 className="text-xl font-semibold text-white">Results</h3>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {articles?.map((article) => (
+              <ArticleCard key={article.id} article={article} onClick={() => onArticleClick(article)} />
+            ))}
+          </div>
+        </div>
+}
+
         <div className="mb-12">
           <div className="flex items-center gap-2 mb-6">
             <TrendingUp className="w-6 h-6 text-orange-500" />
             <h3 className="text-xl font-semibold text-white">Trending & Recommended Articles</h3>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {articles?.map((article) => (
+            {articles?.slice(0,3)?.map((article) => (
               <ArticleCard key={article.id} article={article} onClick={() => onArticleClick(article)} />
             ))}
           </div>
@@ -422,15 +435,6 @@ const HomePage = ({ onArticleClick }) => {
         
         <div className="mb-12">
           <GraphPanel />
-        </div>
-        
-        <div>
-          <h3 className="text-xl font-semibold text-white mb-6">Tüm Makaleler ({articles.length})</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {articles?.map((article) => (
-              <ArticleCard key={article.id} article={article} onClick={() => onArticleClick(article)} />
-            ))}
-          </div>
         </div>
       </div>
     </div>
