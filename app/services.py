@@ -58,4 +58,5 @@ class ArticleService:
             keywords=article.keywords,
             citation_count=article.citation_count,
             author_names=article.authors,
+            article_url = article.article_url
         )
