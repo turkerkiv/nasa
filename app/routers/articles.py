@@ -7,7 +7,7 @@ from fastapi.responses import FileResponse
 from pathlib import Path
 from typing import List
 from app.schemas import YearCount
-from app.schemas import YearTrending
+from app.schemas import YearTrending, ArticleListItem
 
 router = APIRouter(prefix="/articles", tags=["articles"])
 
@@ -95,6 +95,24 @@ async def get_trending_articles(
         years=years, min_citations=min_citations, min_percentile=min_percentile
     )
     return trending
+
+
+@router.get("/{article_id}/similar", response_model=List[ArticleListItem])
+async def get_similar_articles(
+    article_id: int,
+    limit: int = 3,
+    service: services.ArticleService = Depends(get_service),
+):
+    """
+    Return up to `limit` articles similar to the given article_id based on shared keywords.
+    If not enough similar articles exist, fill the remainder with random articles.
+    """
+    if limit < 1:
+        limit = 3
+    if limit > 10:
+        limit = 10
+    items = await service.get_similar_articles(article_id=article_id, limit=limit)
+    return items
 
 
 @router.get("/{article_id}", response_model=services.ArticleBase)

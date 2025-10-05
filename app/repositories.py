@@ -187,3 +187,61 @@ class ArticleRepository:
 
         # Finally, return up to `years` pairs (may be fewer if not enough years exist)
         return pairs[:years]
+
+    async def get_similar_articles(
+        self, article_id: int, limit: int = 3
+    ) -> list[ArticleORM]:
+        """
+        Return up to `limit` articles similar to the article with id `article_id`.
+        Similarity is defined by shared keywords (ArticleORM.keywords string).
+        If there are fewer than `limit` similar articles, fill the remainder with random
+        articles (excluding the original), appended at the end.
+        """
+        # fetch target article
+        target = await self.get_by_id(article_id)
+        if target is None:
+            return []
+
+        def parse_keywords(kws: str) -> set[str]:
+            if not kws:
+                return set()
+            parts = []
+            for part in kws.split(","):
+                subparts = part.split(";") if ";" in part else [part]
+                parts.extend(subparts)
+            return {p.strip().lower() for p in parts if p and p.strip()}
+
+        target_kws = parse_keywords(target.keywords or "")
+
+        # fetch other articles
+        result = await self.db.execute(select(ArticleORM))
+        items = result.scalars().all()
+
+        others = [a for a in items if a.id != article_id]
+
+        similar_scores: list[tuple[int, ArticleORM]] = []
+        for a in others:
+            kws = parse_keywords(a.keywords or "")
+            shared = len(target_kws.intersection(kws)) if target_kws else 0
+            if shared > 0:
+                # score primarily by shared count, tiebreaker by citation_count
+                score = (shared, int(a.citation_count or 0))
+                similar_scores.append((score, a))
+
+        # sort by shared desc then citation_count desc
+        similar_scores.sort(key=lambda x: (x[0][0], x[0][1]), reverse=True)
+        similar_articles = [a for _, a in similar_scores]
+
+        # If not enough similar, pick random fillers (append at end)
+        import random
+
+        fillers: list[ArticleORM] = []
+        if len(similar_articles) < limit:
+            remaining_pool = [a for a in others if a not in similar_articles]
+            random.shuffle(remaining_pool)
+            need = limit - len(similar_articles)
+            fillers = remaining_pool[:need]
+
+        combined = similar_articles[:limit] + fillers
+        # ensure no more than limit
+        return combined[:limit]

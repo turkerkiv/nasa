@@ -189,3 +189,31 @@ class ArticleService:
             )
             results.append(YearTrending(year=int(y), article=item))
         return results
+
+    async def get_similar_articles(
+        self, article_id: int, limit: int = 3
+    ) -> list[ArticleListItem]:
+        """
+        Return up to `limit` ArticleListItem objects similar to the given article_id.
+        """
+        items = await self.articleRepo.get_similar_articles(
+            article_id=article_id, limit=limit
+        )
+        pydantic_items: list[ArticleListItem] = []
+        for a in items:
+            pydantic_items.append(
+                ArticleListItem(
+                    id=a.id,
+                    title=a.title,
+                    publication_date=a.publication_date,
+                    citation_count=a.citation_count,
+                    abstract_compressed=(
+                        (a.abstract[:50] + "...")
+                        if a.abstract and len(a.abstract) > 50
+                        else a.abstract or ""
+                    ),
+                    keywords=a.keywords,
+                    author_names=a.authors,
+                )
+            )
+        return pydantic_items
