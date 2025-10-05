@@ -218,7 +218,7 @@ const ArticleDetailPage = ({ article, onBack, onArticleClick }) => {
                   <span>{article.citation_count} alıntı</span>
                 </div>
               </div>
-              <a href={"/doi.org/"+article.doi} className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 mb-8">
+              <a href={"https://doi.org/"+article.doi} className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 mb-8">
                 <ExternalLink className="w-4 h-4" />
                 {article.doi}
               </a>
