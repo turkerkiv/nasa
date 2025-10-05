@@ -1,27 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import StarBackground from './StarBackground';
 import { Search, Filter, TrendingUp, MessageCircle, X, ChevronRight, Calendar, User, ExternalLink, FileText, BarChart3, Network, Sparkles, BookOpen, Quote, Send, ArrowLeft } from 'lucide-react';
+import ExperimentsPreview from './ExperimentsPreview';
+import ArticleReels from './ArticleReels';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-
-
-const categories = ["microgravity", "tissue effects", "immune system", "cardiomyocytes", "cancer biology", "human health"];
-
-const trendData = [
-  { year: 2020, articles: 45 },
-  { year: 2021, articles: 62 },
-  { year: 2022, articles: 78 },
-  { year: 2023, articles: 95 },
-  { year: 2024, articles: 112 }
-];
-
-const categoryData = [
-  { name: 'Microgravity', value: 35, color: '#3b82f6' },
-  { name: 'Tissue', value: 25, color: '#8b5cf6' },
-  { name: 'Immune', value: 20, color: '#ec4899' },
-  { name: 'Cardio', value: 15, color: '#10b981' },
-  { name: 'Cancer', value: 18, color: '#f59e0b' },
-  { name: 'Health', value: 22, color: '#ef4444' }
-];
+import KnowledgeGraphCards from './KnowledgeGraphCards';
 
 // Navbar Component
 const Navbar = () => (
@@ -36,7 +19,7 @@ const Navbar = () => (
           <p className="text-xs text-gray-400">Smart Article Platform</p>
         </div>
       </div>
-      {/* Butonlar kaldırıldı */}
+  {/* Buttons removed */}
     </div>
   </nav>
 );
@@ -67,83 +50,16 @@ const ReelsModal = ({ articles, open, onClose }) => {
             className="px-3 py-1 bg-gray-700 text-white rounded-lg disabled:opacity-40"
             onClick={() => setCurrent(c => Math.max(0, c - 1))}
             disabled={current === 0}
-          >Önceki</button>
+          >Previous</button>
           <button
             className="px-3 py-1 bg-blue-600 text-white rounded-lg disabled:opacity-40"
             onClick={() => setCurrent(c => Math.min(articles.length - 1, c + 1))}
             disabled={current === articles.length - 1}
-          >Sonraki</button>
+          >Next</button>
         </div>
         <div className="mt-2 text-xs text-gray-400">{current + 1} / {articles.length}</div>
       </div>
     </div>
-  );
-};
-const Chatbot = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState([
-    { type: 'bot', text: 'Hello! How can I assist you with NASA biology articles?' }
-  ]);
-  const [input, setInput] = useState('');
-
-  const handleSend = () => {
-    setMessages([...messages, { type: 'user', text: input }]);
-    setTimeout(() => {
-      setMessages(prev => [...prev, {
-        type: 'bot',
-        text: 'Sorunuzu aldım! Bu bir demo versiyonudur. Gerçek uygulamada AI asistanı devreye girecek.'
-      }]);
-    }, 1000);
-    setInput('');
-  };
-
-  return (
-    <>
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-6 left-6 bg-gradient-to-r from-blue-600 to-purple-600 text-white p-4 rounded-full shadow-2xl hover:shadow-blue-500/50 hover:scale-110 transition-all duration-300 z-50"
-      >
-        {isOpen ? <X className="w-6 h-6" /> : <MessageCircle className="w-6 h-6" />}
-      </button>
-
-      {isOpen && (
-        <div className="fixed bottom-24 left-6 w-96 h-[500px] bg-gray-800 border border-gray-700 rounded-xl shadow-2xl flex flex-col z-50">
-          <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-4 rounded-t-xl flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <MessageCircle className="w-5 h-5 text-white" />
-              <span className="font-semibold text-white">YazTek Research Assistant</span>
-            </div>
-            <button onClick={() => setIsOpen(false)} className="text-white hover:bg-white/20 p-1 rounded transition">
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-          
-          <div className="flex-1 p-4 overflow-y-auto space-y-3">
-            {messages.map((msg, idx) => (
-              <div key={idx} className={`rounded-lg p-3 ${msg.type === 'bot' ? 'bg-gray-700 text-gray-300' : 'bg-blue-600 text-white ml-8'}`}>
-                <p className="text-sm">{msg.text}</p>
-              </div>
-            ))}
-          </div>
-          
-          <div className="p-4 border-t border-gray-700">
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-                placeholder="Soru sorun..."
-                className="flex-1 px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
-              />
-              <button onClick={handleSend} className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg transition">
-                <Send className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </>
   );
 };
 
@@ -181,31 +97,53 @@ const ArticleCard = ({ article, onClick }) => (
 );
 
 // Graph Panel
-const GraphPanel = () => (
+const GraphPanel = ({ trendData, categories }) => (
   <div className="bg-gray-800 border border-gray-700 rounded-xl p-6">
-    <h3 className="text-xl font-semibold text-white mb-6 flex items-center gap-2">
-      <BarChart3 className="w-6 h-6 text-blue-500" />
-      Analitik Gösterge Paneli
-    </h3>
+      <h3 className="text-xl font-semibold text-white mb-6 flex items-center gap-2">
+        <BarChart3 className="w-6 h-6 text-blue-500" />
+        Analytics Dashboard
+      </h3>
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
       <div className="bg-gray-900 rounded-lg p-4">
-        <h4 className="text-sm font-medium text-gray-400 mb-4">Yıllık Yayın Trendi</h4>
+  <h4 className="text-sm font-medium text-gray-400 mb-4">Yearly Publication Trend</h4>
         <ResponsiveContainer width="100%" height={200}>
-          <LineChart data={trendData}>
+          <LineChart data={[...trendData].reverse()}>
             <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
             <XAxis dataKey="year" stroke="#9ca3af" />
             <YAxis stroke="#9ca3af" />
             <Tooltip contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151' }} labelStyle={{ color: '#fff' }} />
-            <Line type="monotone" dataKey="articles" stroke="#3b82f6" strokeWidth={3} dot={{ fill: '#3b82f6', r: 5 }} />
+            <Line type="monotone" dataKey="count" stroke="#3b82f6" strokeWidth={3} dot={{ fill: '#3b82f6', r: 5 }} />
           </LineChart>
         </ResponsiveContainer>
       </div>
       <div className="bg-gray-900 rounded-lg p-4">
-        <h4 className="text-sm font-medium text-gray-400 mb-4">Kategori Dağılımı</h4>
+  <h4 className="text-sm font-medium text-gray-400 mb-4">Category Distribution</h4>
         <ResponsiveContainer width="100%" height={200}>
           <PieChart>
-            <Pie data={categoryData} cx="50%" cy="50%" outerRadius={70} dataKey="value" label={(entry) => entry.name}>
-              {categoryData.map((entry, index) => (
+            <Pie
+              data={categories.length > 0 ? categories.map((cat, idx) => ({ name: cat, value: 1 + (idx % 5), color: ["#6366f1", "#8b5cf6", "#f59e42", "#10b981", "#ef4444"][idx % 5] })) : [
+                { name: "Space Biology", value: 5, color: "#6366f1" },
+                { name: "Genomics", value: 3, color: "#8b5cf6" },
+                { name: "Microgravity", value: 4, color: "#f59e42" },
+                { name: "Radiation", value: 2, color: "#10b981" },
+                { name: "Cell Culture", value: 1, color: "#ef4444" }
+              ]}
+              cx="50%"
+              cy="50%"
+              outerRadius={70}
+              dataKey="value"
+              label={(entry) => entry.name}
+            >
+              {(categories.length > 0
+                ? categories.map((cat, idx) => ({ color: ["#6366f1", "#8b5cf6", "#f59e42", "#10b981", "#ef4444"][idx % 5] }))
+                : [
+                    { color: "#6366f1" },
+                    { color: "#8b5cf6" },
+                    { color: "#f59e42" },
+                    { color: "#10b981" },
+                    { color: "#ef4444" }
+                  ]
+              ).map((entry, index) => (
                 <Cell key={index} fill={entry.color} />
               ))}
             </Pie>
@@ -214,31 +152,60 @@ const GraphPanel = () => (
         </ResponsiveContainer>
       </div>
     </div>
-    <div className="bg-gray-900 rounded-lg p-4">
-      <h4 className="text-sm font-medium text-gray-400 mb-4 flex items-center gap-2">
-        <Network className="w-4 h-4" />
-        Konu İlişki Haritası (Knowledge Graph)
-      </h4>
-      <div className="h-48 flex items-center justify-center border-2 border-dashed border-gray-700 rounded-lg">
-        <div className="text-center">
-          <Network className="w-12 h-12 text-gray-600 mx-auto mb-2" />
-          <p className="text-gray-500 text-sm">İnteraktif grafik yükleniyor...</p>
-        </div>
-      </div>
-    </div>
   </div>
 );
 
 // Article Detail Page
-const ArticleDetailPage = ({ article, onBack }) => {
+const ArticleDetailPage = ({ article, onBack, onArticleClick }) => {
+  // Similar articles state
+  const [similarArticles, setSimilarArticles] = useState([]);
+  useEffect(() => {
+    if (article?.id) {
+      fetch(`http://127.0.0.1:8001/articles/${article.id}/similar?limit=3`)
+        .then(res => res.json())
+        .then(data => setSimilarArticles(data || []))
+        .catch(() => setSimilarArticles([]));
+    }
+  }, [article?.id]);
   const [activeTab, setActiveTab] = useState('abstract');
-  // Benzer makaleler özelliği kaldırıldı (backendde yok)
+
+  // Chatbot for article detail
+  const [chatOpen, setChatOpen] = useState(false);
+  const [chatMessages, setChatMessages] = useState([
+    { type: 'bot', text: 'You can ask questions about this article.' }
+  ]);
+  const [chatInput, setChatInput] = useState('');
+  const [chatLoading, setChatLoading] = useState(false);
+
+  const handleChatSend = async () => {
+    if (!chatInput.trim()) return;
+    setChatMessages([...chatMessages, { type: 'user', text: chatInput }]);
+    setChatLoading(true);
+    try {
+      const response = await fetch('http://127.0.0.1:8001/articles/chatbot/', {
+        method: 'POST',
+        headers: {
+          'accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ article_id: article.id, message: chatInput })
+      });
+      const data = await response.json();
+      console.log(data)
+      setChatMessages(prev => [...prev, { type: 'bot', text: data.reply || 'Yanıt alınamadı.' }]);
+    } catch (error) {
+      setChatMessages(prev => [...prev, { type: 'bot', text: 'Sunucuya bağlanılamadı.' }]);
+    }
+    setChatInput('');
+    setChatLoading(false);
+  };
+
   return (
     <div className="min-h-screen bg-gray-900">
       <div className="max-w-7xl mx-auto px-6 py-8">
         <button onClick={onBack} className="mb-6 flex items-center gap-2 text-gray-400 hover:text-white transition hover:shadow-[0_0_20px_5px_rgba(168,85,247,0.5)] focus:shadow-[0_0_20px_5px_rgba(168,85,247,0.7)]">
           <ArrowLeft className="w-5 h-5" />
-          Geri Dön
+          Go Back
         </button>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
@@ -258,48 +225,117 @@ const ArticleDetailPage = ({ article, onBack }) => {
                 </div>
                 <div className="flex items-center gap-2">
                   <Quote className="w-4 h-4" />
-                  <span>{article.citation_count} alıntı</span>
+                  <span>{article.citation_count} citations</span>
                 </div>
               </div>
-              <a href="#" className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 mb-8">
+              <a
+                href={`https://doi.org/${article.doi}`}
+                className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 mb-8"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 <ExternalLink className="w-4 h-4" />
                 {article.doi}
               </a>
               <div className="border-b border-gray-700 mb-6">
                 <div className="flex gap-4">
-                  {['abstract', 'knowledge', 'pdf'].map((tab) => (
-                    <button key={tab} onClick={() => setActiveTab(tab)} className={`pb-3 px-2 capitalize transition ${activeTab === tab ? 'text-blue-400 border-b-2 border-blue-400 shadow-[0_0_20px_5px_rgba(168,85,247,0.5)]' : 'text-gray-400 hover:text-white hover:shadow-[0_0_20px_5px_rgba(168,85,247,0.3)] focus:shadow-[0_0_20px_5px_rgba(168,85,247,0.5)]'}`}>
-                      {tab === 'abstract' && 'Özet'}
-                      {tab === 'knowledge' && 'Bilgi Grafiği'}
+                  {['abstract', 'knowledge', 'pdf', 'experiments'].map((tab) => (
+                    <button key={tab} onClick={() => setActiveTab(tab)} className={`p-2 rounded capitalize transition ${activeTab === tab ? 'text-blue-400 border-b-2 border-blue-400 shadow-[0_0_20px_5px_rgba(168,85,247,0.5)]' : 'text-gray-400 hover:text-white hover:shadow-[0_0_20px_5px_rgba(168,85,247,0.3)] focus:shadow-[0_0_20px_5px_rgba(168,85,247,0.5)]'}`}>
+                      {tab === 'abstract' && 'Abstract'}
+                      {tab === 'knowledge' && 'Knowledge Graph'}
                       {tab === 'pdf' && 'PDF'}
+                      {tab === 'experiments' && 'Experiments'}
                     </button>
                   ))}
                 </div>
               </div>
               <div className="text-gray-300 leading-relaxed">
                 {activeTab === 'abstract' && <p>{article.abstract}</p>}
-                {activeTab === 'knowledge' && (
-                  <div className="flex flex-col items-center justify-center py-8">
-                    <h3 className="text-xl font-bold text-blue-400 mb-4">Bilgi Grafiği</h3>
-                    <div className="bg-gray-900 rounded-lg border border-blue-700 p-8 flex flex-col items-center justify-center w-full max-w-xl">
-                      <Network className="w-16 h-16 text-blue-400 mb-4" />
-                      <p className="text-gray-300 text-center mb-2">Makalenin ilişkili kavramları ve süreçleri gösteren bir bilgi grafiği burada yer alacak.</p>
-                      <p className="text-xs text-gray-500 text-center">(Gerçek grafik entegrasyonu için ek geliştirme gereklidir)</p>
-                    </div>
-                  </div>
-                )}
+                {activeTab === 'knowledge' && <KnowledgeGraphCards articleId={article.id} />}
                 {activeTab === 'pdf' && (
                   <div className="h-96 bg-gray-900 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-700">
-                    <div className="text-center">
-                      <FileText className="w-16 h-16 text-gray-600 mx-auto mb-3" />
-                      <p className="text-gray-500">PDF Görüntüleyici ({article.file_name})</p>
-                    </div>
+                    {article.id ? (
+                      <iframe
+                        src={`http://127.0.0.1:8001/articles/pdf/${article.file_name}`}
+                        title="Makale PDF"
+                        width="100%"
+                        height="100%"
+                        className="rounded-lg border-none h-full w-full"
+                      />
+                    ) : (
+                      <div className="text-center">
+                        <FileText className="w-16 h-16 text-gray-600 mx-auto mb-3" />
+                        <p className="text-gray-500">PDF Viewer ({article.file_name})</p>
+                      </div>
+                    )}
                   </div>
                 )}
+                {activeTab === 'experiments' && <ExperimentsPreview />}
+              </div>
+            </div>
+            {/* Article Chatbot Floating Button & Modal (moved to right) */}
+            <button
+              onClick={() => setChatOpen(!chatOpen)}
+              className="fixed bottom-6 right-6 bg-gradient-to-r from-blue-600 to-purple-600 text-white p-4 rounded-full shadow-2xl hover:shadow-blue-500/50 hover:scale-110 transition-all duration-300 z-50"
+            >
+              {chatOpen ? <X className="w-6 h-6" /> : <MessageCircle className="w-6 h-6" />}
+            </button>
+            {chatOpen && (
+              <div className="fixed bottom-24 right-6 w-96 h-[500px] bg-gray-800 border border-gray-700 rounded-xl shadow-2xl flex flex-col z-50">
+                <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-4 rounded-t-xl flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <MessageCircle className="w-5 h-5 text-white" />
+                    <span className="font-semibold text-white">YazTek Article Assistant</span>
+                  </div>
+                  <button onClick={() => setChatOpen(false)} className="text-white hover:bg-white/20 p-1 rounded transition">
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+                <div className="flex-1 p-4 overflow-y-auto space-y-3">
+                  {chatMessages.map((msg, idx) => (
+                    <div key={idx} className={`rounded-lg p-3 ${msg.type === 'bot' ? 'bg-gray-700 text-gray-300' : 'bg-blue-600 text-white ml-8'}`}>
+                      <p className="text-sm">{msg.text}</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="p-4 border-t border-gray-700">
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={chatInput}
+                      onChange={(e) => setChatInput(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleChatSend()}
+                      placeholder="Ask a question about the article..."
+                      className="flex-1 px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
+                      disabled={chatLoading}
+                    />
+                    <button onClick={handleChatSend} className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg transition" disabled={chatLoading}>
+                      {chatLoading ? <span className="animate-spin">...</span> : <Send className="w-5 h-5" />}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+          {/* Similar Articles - right side */}
+          <div className="hidden lg:block">
+            <div className="bg-gray-800 border border-gray-700 rounded-xl p-6">
+              <h4 className="text-lg font-bold text-blue-400 mb-4">Similar Articles</h4>
+              <div className="space-y-4">
+                {similarArticles.length === 0 && (
+                  <p className="text-gray-400">No similar articles found.</p>
+                )}
+                {similarArticles.map((sim) => (
+                  <div onClick={() => onArticleClick(sim)} key={sim.id} className="bg-gray-900 rounded-lg p-4 border border-gray-700 hover:border-blue-400 transition cursor-pointer">
+                    <h5 className="text-md font-semibold text-white mb-2">{sim.title}</h5>
+                    <p className="text-gray-400 text-sm mb-2">{sim.author_names}</p>
+                    <p className="text-gray-500 text-xs">{sim.publication_date?.slice(0, 10)}</p>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
-        </div>
+          </div>
       </div>
     </div>
   );
@@ -307,30 +343,99 @@ const ArticleDetailPage = ({ article, onBack }) => {
 
 // Main Home Page
 const HomePage = ({ onArticleClick }) => {
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [reelsOpen, setReelsOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [articles, setArticles] = useState([]);
+  const [trendArticles, setTrendArticles] = useState([]);
+  const [trendData, setTrendData] = useState<{ year: number, count: number }[]>([]);
+  const [resultArticles, setResultArticles] = useState<[]>([]);
+  const [categories, setCategories] = useState([]);
+  const [isAll, setIsAll] = useState(true);
+  const [page, setPage] = useState(1);
+  const [pageSize] = useState(3);
+  const [total, setTotal] = useState(0);
 
-  // Fetch all articles on mount
+  // Fetch trend articles and yearly trend data on mount
   useEffect(() => {
     const fetchArticles = async () => {
       try {
-        const response = await fetch('http://localhost:8000/articles/');
+        const response = await fetch('http://localhost:8001/articles/trending?years=3&min_citations=7&min_percentile=0.1');
         const data = await response.json();
-        setArticles(data.items);
+        setTrendArticles(data.map(d => d.article));
       } catch (error) {
         console.error('Error fetching articles:', error);
       }
     };
     fetchArticles();
+
+    // Fetch yearly counts for trend graph
+    const fetchTrendData = async () => {
+      try {
+        const response = await fetch('http://127.0.0.1:8001/articles/counts-by-year');
+        const data = await response.json();
+        setTrendData(data);
+        console.log('Yearly trend data:', data);
+      } catch (error) {
+        console.error('Error fetching yearly trend data:', error);
+      }
+    };
+    fetchTrendData();
   }, []);
+
+  useEffect(() => {
+    const fetchArticles = async () => {
+      try {
+        const response = await fetch(`http://127.0.0.1:8001/articles/?page=${page}&page_size=${pageSize}&query=${encodeURIComponent(searchQuery)}`);
+        const data = await response.json();
+        setResultArticles(data.items);
+        setTotal(data.total);
+      } catch (error) {
+        console.error('Error fetching articles:', error);
+      }
+    };
+    fetchArticles();
+  }, [page, isAll]);
+
+  // Fetch categories (keywords) from backend
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch('http://127.0.0.1:8001/articles/keywords?limit=15');
+        const data = await response.json();
+        setCategories(data || []);
+      } catch (error) {
+        console.error('Error fetching keywords:', error);
+      }
+    };
+    fetchCategories();
+  }, []);
+
+  // Search keywords handler
+  // const handleKeywordSearch = async () => {
+  //   if (!searchQuery.trim()) return;
+  //   try {
+  //     const response = await fetch(`http://127.0.0.1:8001/articles/keywords?query=${encodeURIComponent(searchQuery.trim())}&limit=15`);
+  //     const data = await response.json();
+  //     setCategories(data.keywords || []);
+  //   } catch (error) {
+  //     console.error('Keyword search error:', error);
+  //     setCategories([]);
+  //   }
+  // };
 
   // Search handler
   const handleSearch = async () => {
+    setPage(1);
     try {
-      const response = await fetch(`http://127.0.0.1:8000/articles/?page=1&page_size=10&query=${encodeURIComponent(searchQuery)}`);
+      const response = await fetch(`http://127.0.0.1:8001/articles/?page=1&page_size=3&query=${encodeURIComponent(searchQuery)}`);
       const data = await response.json();
-      setArticles(data.items);
+      setResultArticles(data.items);
+      setTotal(data.total);
+      if (searchQuery.trim() === '') {
+        setIsAll(true);
+      } else {
+        setIsAll(false);
+      }
     } catch (error) {
       console.error('Error searching articles:', error);
     }
@@ -345,12 +450,25 @@ const HomePage = ({ onArticleClick }) => {
 
   return (
     <div className="min-h-screen bg-gray-900">
+      {/* Explore Button */}
+      <button
+        className="fixed top-6 right-8 z-50 px-5 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full shadow-lg hover:scale-105 transition-all font-semibold border border-purple-500/30"
+        onClick={() => setReelsOpen(true)}
+      >
+        Explore
+      </button>
+      {reelsOpen && (
+        <ArticleReels
+          onArticleClick={onArticleClick}
+          onClose={() => setReelsOpen(false)}
+        />
+      )}
       <div className="max-w-7xl mx-auto px-6 py-12">
         <div className="text-center mb-12">
           <h2 className="text-4xl font-bold text-white mb-4">NASA Biology Research</h2>
           <p className="text-gray-400 text-lg">Discover the latest scientific articles in space biology</p>
         </div>
-        
+
         <div className="mb-8">
           <div className="relative max-w-3xl mx-auto">
             <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -368,43 +486,77 @@ const HomePage = ({ onArticleClick }) => {
             />
           </div>
         </div>
-        
+
         <div className="mb-12">
           <div className="flex flex-wrap gap-3 justify-center">
-            <button onClick={() => setSelectedCategory('all')} className={`px-6 py-2 rounded-full transition ${selectedCategory === 'all' ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-purple-500/50' : 'bg-gray-800 text-gray-300 hover:bg-gray-700 border border-gray-700 hover:shadow-[0_0_20px_5px_rgba(168,85,247,0.5)] focus:shadow-[0_0_20px_5px_rgba(168,85,247,0.7)]'}`}>
-              Tümü
-            </button>
-            {categories.map((cat) => (
-              <button key={cat} onClick={() => setSelectedCategory(cat)} className={`px-6 py-2 rounded-full transition capitalize ${selectedCategory === cat ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-purple-500/50' : 'bg-gray-800 text-gray-300 hover:bg-gray-700 border border-gray-700 hover:shadow-[0_0_20px_5px_rgba(168,85,247,0.5)] focus:shadow-[0_0_20px_5px_rgba(168,85,247,0.7)]'}`}>
-                {cat}
-              </button>
+              {categories?.map((cat, idx) => (
+                <button
+                  key={idx}
+                  onClick={async () => {
+                    setSelectedCategory(cat);
+                    setSearchQuery(cat);
+                    await handleSearch();
+                  }}
+                  className={`px-6 py-2 rounded-full transition capitalize ${selectedCategory === cat ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-purple-500/50' : 'bg-gray-800 text-gray-300 hover:bg-gray-700 border border-gray-700 hover:shadow-[0_0_20px_5px_rgba(168,85,247,0.5)] focus:shadow-[0_0_20px_5px_rgba(168,85,247,0.7)]'}`}
+                >
+                  {cat}
+                </button>
+              ))}
+          </div>
+        </div>
+
+        
+
+        <div className="mb-12">
+          <div className="flex items-baseline justify-between gap-2 mb-6">
+            <div className='flex items-center gap-2'>
+            <TrendingUp className="w-6 h-6 text-orange-500" />
+            <h3 className="text-xl font-semibold text-white">{isAll ? "All" : "Results"}</h3>
+            </div>
+            {/* Pagination Controls - Arrow, Current, Last */}
+          <div className="mb-4 flex justify-center items-center gap-4">
+          <button
+            className="px-3 py-2 rounded-lg bg-gray-700 text-white disabled:opacity-40 flex items-center"
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={page === 1}
+            aria-label="Previous page"
+          >
+            <ChevronRight className="w-5 h-5 rotate-180" />
+          </button>
+          <span className="text-white font-semibold text-lg">
+            {page} / {Math.max(1, Math.ceil(total / pageSize))}
+          </span>
+          <button
+            className="px-3 py-2 rounded-lg bg-gray-700 text-white disabled:opacity-40 flex items-center"
+            onClick={() => setPage((p) => Math.min(Math.ceil(total / pageSize), p + 1))}
+            disabled={page === Math.ceil(total / pageSize) || total === 0}
+            aria-label="Next page"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+        </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {resultArticles?.map((article) => (
+              <ArticleCard key={article.id} article={article} onClick={() => onArticleClick(article)} />
             ))}
           </div>
         </div>
-        
+
         <div className="mb-12">
           <div className="flex items-center gap-2 mb-6">
             <TrendingUp className="w-6 h-6 text-orange-500" />
             <h3 className="text-xl font-semibold text-white">Trending & Recommended Articles</h3>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {articles?.map((article) => (
+            {trendArticles?.map((article) => (
               <ArticleCard key={article.id} article={article} onClick={() => onArticleClick(article)} />
             ))}
           </div>
         </div>
-        
+
         <div className="mb-12">
-          <GraphPanel />
-        </div>
-        
-        <div>
-          <h3 className="text-xl font-semibold text-white mb-6">Tüm Makaleler ({articles.length})</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {articles?.map((article) => (
-              <ArticleCard key={article.id} article={article} onClick={() => onArticleClick(article)} />
-            ))}
-          </div>
+          <GraphPanel trendData={trendData} categories={categories} />
         </div>
       </div>
     </div>
@@ -422,7 +574,7 @@ export default function App() {
     try {
       // If article has id, fetch details from backend
       if (article && article.id) {
-        const response = await fetch(`http://127.0.0.1:8000/articles/${article.id}`);
+        const response = await fetch(`http://127.0.0.1:8001/articles/${article.id}`);
         if (!response.ok) throw new Error('Makale detayları alınamadı');
         const data = await response.json();
         setSelectedArticle(data);
@@ -449,9 +601,9 @@ export default function App() {
       <Navbar />
       {currentPage === 'home' && <HomePage onArticleClick={handleArticleClick} />}
       {currentPage === 'detail' && selectedArticle && (
-        <ArticleDetailPage article={selectedArticle} onBack={handleBackToHome} />
+        <ArticleDetailPage article={selectedArticle} onBack={handleBackToHome} onArticleClick={handleArticleClick} />
       )}
-      <Chatbot />
+      {/* Chatbot removed from homepage, now only in ArticleDetailPage */}
     </>
   );
 }

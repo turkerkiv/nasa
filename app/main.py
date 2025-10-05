@@ -11,7 +11,7 @@ app.include_router(articles.router)
 app.include_router(chatbot.router)
 
 origins = [
-    "http://localhost:5174",
+    "http://localhost:5173",
 ]
 
 app.add_middleware(
