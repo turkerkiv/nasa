@@ -228,3 +228,28 @@ class ArticleService:
                 )
             )
         return pydantic_items
+
+    async def get_pill_info(self, article_id: int):
+        """
+        Return PillInfo pydantic model for the given article_id or None.
+        """
+        orm = await self.articleRepo.get_pill_info_by_article(article_id)
+        if orm is None:
+            return None
+
+        # Lazy import to avoid circularity at module import time
+        from app.schemas import PillInfo
+
+        return PillInfo(
+            id=orm.id,
+            article_id=orm.article_id,
+            study_subject=orm.study_subject,
+            environment_type=orm.environment_type,
+            duration=orm.duration,
+            biological_focus=orm.biological_focus,
+            study_type=orm.study_type,
+            primary_finding=orm.primary_finding,
+            sample_info=orm.sample_info,
+            intervention_treatment=orm.intervention_treatment,
+            statistical_evidence=bool(orm.statistical_evidence),
+        )
