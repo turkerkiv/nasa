@@ -96,17 +96,28 @@ class ArticleService:
         self.articleRepo = ArticleRepository(db)
 
     async def get_all(
-        self, page: int = 1, page_size: int = 10, query: str | None = None
+        self,
+        page: int = 1,
+        page_size: int = 10,
+        query: str | None = None,
+        keyword: str | None = None,
+        israndom: bool = False,
     ) -> PaginatedArticles:
         if page < 1:
             page = 1
         if page_size < 1:
             page_size = 10
 
-        offset = (page - 1) * page_size
-        items, total = await self.articleRepo.get_all(
-            limit=page_size, offset=offset, search=query
-        )
+        # If random mode requested, ignore paging, search and keyword filters
+        if israndom:
+            # repository.get_random returns (items, total)
+            items, total = await self.articleRepo.get_random(limit=page_size)
+            # we still return page and page_size for compatibility
+        else:
+            offset = (page - 1) * page_size
+            items, total = await self.articleRepo.get_all(
+                limit=page_size, offset=offset, search=query, keyword=keyword
+            )
 
         pydantic_items: List[ArticleListItem] = []
         for a in items:
@@ -189,3 +200,31 @@ class ArticleService:
             )
             results.append(YearTrending(year=int(y), article=item))
         return results
+
+    async def get_similar_articles(
+        self, article_id: int, limit: int = 3
+    ) -> list[ArticleListItem]:
+        """
+        Return up to `limit` ArticleListItem objects similar to the given article_id.
+        """
+        items = await self.articleRepo.get_similar_articles(
+            article_id=article_id, limit=limit
+        )
+        pydantic_items: list[ArticleListItem] = []
+        for a in items:
+            pydantic_items.append(
+                ArticleListItem(
+                    id=a.id,
+                    title=a.title,
+                    publication_date=a.publication_date,
+                    citation_count=a.citation_count,
+                    abstract_compressed=(
+                        (a.abstract[:50] + "...")
+                        if a.abstract and len(a.abstract) > 50
+                        else a.abstract or ""
+                    ),
+                    keywords=a.keywords,
+                    author_names=a.authors,
+                )
+            )
+        return pydantic_items
