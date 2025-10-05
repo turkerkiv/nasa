@@ -307,28 +307,43 @@ const ArticleDetailPage = ({ article, onBack }) => {
 const HomePage = ({ onArticleClick }) => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [articles, setArticles] = useState([]);
+  const [trendArticles, setTrendArticles] = useState([]);
+  const [resultArticles, setResultArticles] = useState<[]>([]);
   const [categories, setCategories] = useState([]);
+  const [isAll, setIsAll] = useState(true);
 
-  // Fetch all articles on mount
-  // useEffect(() => {
-  //   const fetchArticles = async () => {
-  //     try {
-  //       const response = await fetch('http://localhost:8000/articles/');
-  //       const data = await response.json();
-  //       setArticles(data.items);
-  //     } catch (error) {
-  //       console.error('Error fetching articles:', error);
-  //     }
-  //   };
-  //   fetchArticles();
-  // }, []);
+  // Fetch trend articles on mount
+  useEffect(() => {
+    const fetchArticles = async () => {
+      try {
+        const response = await fetch('http://localhost:8001/articles/trending?years=3&min_citations=7&min_percentile=0.1');
+        const data = await response.json();
+        setTrendArticles(data.map(d => d.article));
+      } catch (error) {
+        console.error('Error fetching articles:', error);
+      }
+    };
+    fetchArticles();
+  }, []);
+
+   useEffect(() => {
+    const fetchArticles = async () => {
+      try {
+        const response = await fetch(`http://127.0.0.1:8001/articles/?page=1&page_size=3&query=${encodeURIComponent(searchQuery)}`);
+        const data = await response.json();
+        setResultArticles(data.items);
+      } catch (error) {
+        console.error('Error fetching articles:', error);
+      }
+    };
+    fetchArticles();
+  }, []);
 
   // Fetch categories (keywords) from backend
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await fetch('http://127.0.0.1:8000/articles/keywords?limit=15');
+        const response = await fetch('http://127.0.0.1:8001/articles/keywords?limit=15');
         const data = await response.json();
         setCategories(data || []);
       } catch (error) {
@@ -342,7 +357,7 @@ const HomePage = ({ onArticleClick }) => {
   // const handleKeywordSearch = async () => {
   //   if (!searchQuery.trim()) return;
   //   try {
-  //     const response = await fetch(`http://127.0.0.1:8000/articles/keywords?query=${encodeURIComponent(searchQuery.trim())}&limit=15`);
+  //     const response = await fetch(`http://127.0.0.1:8001/articles/keywords?query=${encodeURIComponent(searchQuery.trim())}&limit=15`);
   //     const data = await response.json();
   //     setCategories(data.keywords || []);
   //   } catch (error) {
@@ -354,9 +369,14 @@ const HomePage = ({ onArticleClick }) => {
   // Search handler
   const handleSearch = async () => {
     try {
-      const response = await fetch(`http://127.0.0.1:8000/articles/?page=1&page_size=3&query=${encodeURIComponent(searchQuery)}`);
+      const response = await fetch(`http://127.0.0.1:8001/articles/?page=1&page_size=3&query=${encodeURIComponent(searchQuery)}`);
       const data = await response.json();
-      setArticles(data.items);
+      setResultArticles(data.items);
+      if (searchQuery.trim() === '') {
+        setIsAll(true);
+      } else {
+        setIsAll(false);
+      }
     } catch (error) {
       console.error('Error searching articles:', error);
     }
@@ -397,9 +417,6 @@ const HomePage = ({ onArticleClick }) => {
         
         <div className="mb-12">
           <div className="flex flex-wrap gap-3 justify-center">
-            <button onClick={() => setSelectedCategory(null)} className={`px-6 py-2 rounded-full transition ${selectedCategory === 'all' ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-purple-500/50' : 'bg-gray-800 text-gray-300 hover:bg-gray-700 border border-gray-700 hover:shadow-[0_0_20px_5px_rgba(168,85,247,0.5)] focus:shadow-[0_0_20px_5px_rgba(168,85,247,0.7)]'}`}>
-              All
-            </button>
             {categories?.map((cat, idx) => (
               <button key={idx} onClick={() => setSelectedCategory(cat)} className={`px-6 py-2 rounded-full transition capitalize ${selectedCategory === cat ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-purple-500/50' : 'bg-gray-800 text-gray-300 hover:bg-gray-700 border border-gray-700 hover:shadow-[0_0_20px_5px_rgba(168,85,247,0.5)] focus:shadow-[0_0_20px_5px_rgba(168,85,247,0.7)]'}`}>
                 {cat}
@@ -408,18 +425,17 @@ const HomePage = ({ onArticleClick }) => {
           </div>
         </div>
 
-        {articles.length > 0 && <div className="mb-12">
+    <div className="mb-12">
           <div className="flex items-center gap-2 mb-6">
             <TrendingUp className="w-6 h-6 text-orange-500" />
-            <h3 className="text-xl font-semibold text-white">Results</h3>
+            <h3 className="text-xl font-semibold text-white">{isAll ? "All" : "Results"}</h3>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {articles?.map((article) => (
+            {resultArticles?.map((article) => (
               <ArticleCard key={article.id} article={article} onClick={() => onArticleClick(article)} />
             ))}
           </div>
         </div>
-}
 
         <div className="mb-12">
           <div className="flex items-center gap-2 mb-6">
@@ -427,7 +443,7 @@ const HomePage = ({ onArticleClick }) => {
             <h3 className="text-xl font-semibold text-white">Trending & Recommended Articles</h3>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {articles?.slice(0,3)?.map((article) => (
+            {trendArticles?.map((article) => (
               <ArticleCard key={article.id} article={article} onClick={() => onArticleClick(article)} />
             ))}
           </div>
@@ -452,7 +468,7 @@ export default function App() {
     try {
       // If article has id, fetch details from backend
       if (article && article.id) {
-        const response = await fetch(`http://127.0.0.1:8000/articles/${article.id}`);
+        const response = await fetch(`http://127.0.0.1:8001/articles/${article.id}`);
         if (!response.ok) throw new Error('Makale detayları alınamadı');
         const data = await response.json();
         setSelectedArticle(data);
