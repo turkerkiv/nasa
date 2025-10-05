@@ -1,95 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import StarBackground from './StarBackground';
 import { Search, Filter, TrendingUp, MessageCircle, X, ChevronRight, Calendar, User, ExternalLink, FileText, BarChart3, Network, Sparkles, BookOpen, Quote, Send, ArrowLeft } from 'lucide-react';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
-// Mock Data
-const mockArticles = [
-  {
-    id: 1,
-    title: "Effects of Microgravity on Human Cardiac Tissue Development",
-    authors: "Johnson M., Smith K., Williams R.",
-    year: 2024,
-    category: "microgravity",
-    summary: "This study examines how microgravity conditions affect the development and function of human cardiac tissue using 3D bioprinting technology.",
-    doi: "10.1038/s41586-024-12345",
-    citations: 45,
-    abstract: "Microgravity environments present unique challenges for human physiology, particularly affecting cardiac tissue development. This comprehensive study utilized advanced 3D bioprinting techniques to create cardiac tissue models that were subsequently exposed to simulated microgravity conditions aboard the International Space Station.",
-    methodology: "We utilized state-of-the-art 3D bioprinting technology to create cardiac tissue models using human-induced pluripotent stem cells (hiPSCs). The tissue constructs were cultured in specialized bioreactors designed to simulate microgravity conditions.",
-    results: "Significant changes in gene expression related to cardiac development were observed in microgravity conditions. The tissue samples exhibited modified contractility patterns compared to Earth gravity controls, with a 23% reduction in force generation.",
-    similarArticles: [2, 3]
-  },
-  {
-    id: 2,
-    title: "Immune System Adaptation in Long-Duration Spaceflight",
-    authors: "Chen L., Rodriguez M., Patel S.",
-    year: 2023,
-    category: "immune system",
-    summary: "Analysis of immune system changes in astronauts during extended missions, revealing adaptive mechanisms and potential health risks.",
-    doi: "10.1126/science.2023.789",
-    citations: 67,
-    abstract: "Long-duration spaceflight poses significant challenges to the human immune system. This longitudinal study examines immune cell populations and functional changes in astronauts during six-month missions aboard the International Space Station.",
-    methodology: "Blood samples from 15 astronauts were collected at multiple time points: pre-flight, during flight, and post-flight. Comprehensive immune cell profiling was conducted using flow cytometry.",
-    results: "T-cell populations showed significant alterations during spaceflight, with a notable shift toward memory phenotypes. NK cell activity decreased by 35% during flight but recovered within 60 days post-mission.",
-    similarArticles: [1, 4]
-  },
-  {
-    id: 3,
-    title: "Cardiomyocyte Behavior Under Altered Gravity Conditions",
-    authors: "Anderson T., Lee J., Brown A.",
-    year: 2024,
-    category: "cardiomyocytes",
-    summary: "Investigation of cardiomyocyte morphology and electrical activity changes in response to various gravity levels.",
-    doi: "10.1016/j.cell.2024.456",
-    citations: 32,
-    abstract: "Cardiomyocytes, the contractile cells of the heart, are highly sensitive to mechanical stress and environmental conditions. This study investigates the morphological and functional changes that occur in cardiomyocytes when exposed to altered gravity conditions.",
-    methodology: "iPSC-derived cardiomyocytes were cultured in a rotating wall vessel bioreactor to simulate microgravity conditions. Electrophysiological recordings were obtained using patch-clamp techniques.",
-    results: "Cardiomyocytes exhibited significant changes in calcium handling and action potential duration under microgravity conditions. Structural remodeling was evident after 14 days.",
-    similarArticles: [1, 5]
-  },
-  {
-    id: 4,
-    title: "Cancer Cell Proliferation in Microgravity Environments",
-    authors: "Martinez E., Taylor D., Wilson H.",
-    year: 2023,
-    category: "cancer biology",
-    summary: "Study of cancer cell growth patterns and drug resistance mechanisms in simulated space conditions.",
-    doi: "10.1038/nature.2023.321",
-    citations: 54,
-    abstract: "Cancer cells exhibit unique behaviors in microgravity environments that may provide insights into tumor biology and therapeutic strategies.",
-    methodology: "Multiple cancer cell lines were cultured in 3D under simulated microgravity using clinostat rotation. Drug efficacy testing included common chemotherapeutic agents.",
-    results: "Cancer cells formed unique spheroid structures with altered drug sensitivity profiles. Some cell lines showed increased resistance to chemotherapy.",
-    similarArticles: [2, 6]
-  },
-  {
-    id: 5,
-    title: "Tissue Engineering Approaches for Space Medicine",
-    authors: "Kumar V., Zhang W., Roberts C.",
-    year: 2024,
-    category: "tissue effects",
-    summary: "Comprehensive review of tissue engineering technologies applicable to long-duration space missions and their medical applications.",
-    doi: "10.1016/j.biomaterials.2024.678",
-    citations: 41,
-    abstract: "Long-duration space missions require innovative medical solutions, including the ability to generate tissues and organs on-demand.",
-    methodology: "Literature review encompassing 250+ peer-reviewed publications on tissue engineering and space biology. Experimental validation of 3D bioprinting techniques suitable for microgravity environments.",
-    results: "Several promising approaches were identified for on-demand tissue fabrication in space. Challenges remain in maintaining tissue viability during long-term storage.",
-    similarArticles: [1, 3]
-  },
-  {
-    id: 6,
-    title: "Human Health Monitoring Systems for Deep Space Exploration",
-    authors: "Thompson R., Garcia F., Kim Y.",
-    year: 2023,
-    category: "human health",
-    summary: "Development of autonomous health monitoring technologies for astronauts during missions beyond low Earth orbit.",
-    doi: "10.1109/TBME.2023.901",
-    citations: 38,
-    abstract: "Deep space exploration missions require autonomous health monitoring systems capable of detecting and diagnosing medical conditions without immediate ground support.",
-    methodology: "Integration of multiple wearable sensors monitoring cardiovascular function, respiration, body temperature, and activity levels. AI-powered diagnostic algorithms were trained on astronaut health records.",
-    results: "The system successfully detected health anomalies in real-time simulations with 94% accuracy. Machine learning models identified early signs of cardiovascular stress and psychological distress.",
-    similarArticles: [2, 4]
-  }
-];
 
 const categories = ["microgravity", "tissue effects", "immune system", "cardiomyocytes", "cancer biology", "human health"];
 
@@ -144,7 +57,7 @@ const ReelsModal = ({ articles, open, onClose }) => {
         </button>
         <div className="flex flex-col items-center gap-2">
           <h2 className="text-lg font-bold text-white text-center mb-2">{articles[current].title}</h2>
-          <p className="text-xs text-gray-400 mb-2">{articles[current].authors} • {articles[current].year}</p>
+          <p className="text-xs text-gray-400 mb-2">{articles[current].author_names} • {articles[current].year}</p>
           <div className="bg-gray-800 rounded-lg p-4 mb-2 w-full">
             <p className="text-sm text-gray-200 text-center">{articles[current].summary}</p>
           </div>
@@ -169,7 +82,7 @@ const ReelsModal = ({ articles, open, onClose }) => {
 const Chatbot = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
-    { type: 'bot', text: 'Merhaba! NASA biyoloji makaleleri hakkında size nasıl yardımcı olabilirim?' }
+    { type: 'bot', text: 'Hello! How can I assist you with NASA biology articles?' }
   ]);
   const [input, setInput] = useState('');
 
@@ -198,7 +111,7 @@ const Chatbot = () => {
           <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-4 rounded-t-xl flex items-center justify-between">
             <div className="flex items-center gap-2">
               <MessageCircle className="w-5 h-5 text-white" />
-              <span className="font-semibold text-white">YazTek Araştırma Asistanı</span>
+              <span className="font-semibold text-white">YazTek Research Assistant</span>
             </div>
             <button onClick={() => setIsOpen(false)} className="text-white hover:bg-white/20 p-1 rounded transition">
               <X className="w-5 h-5" />
@@ -240,11 +153,11 @@ const ArticleCard = ({ article, onClick }) => (
   <div onClick={onClick} className="bg-gray-800 border border-gray-700 rounded-xl p-6 hover:border-purple-500 hover:shadow-[0_0_20px_5px_rgba(168,85,247,0.5)] transition cursor-pointer group h-full">
     <div className="flex items-start justify-between mb-3">
       <span className="px-3 py-1 bg-blue-600/20 text-blue-400 text-xs rounded-full border border-blue-500/30">
-        {article.category}
+        {article.keywords}
       </span>
       <span className="text-gray-400 text-sm flex items-center gap-1">
         <Quote className="w-3 h-3" />
-        {article.citations}
+        {article.citation_count}
       </span>
     </div>
     <h3 className="text-lg font-semibold text-white mb-2 group-hover:text-blue-400 transition line-clamp-2">
@@ -254,11 +167,11 @@ const ArticleCard = ({ article, onClick }) => (
     <div className="flex items-center justify-between text-sm mb-4">
       <div className="flex items-center gap-2 text-gray-500">
         <User className="w-4 h-4" />
-        <span className="truncate">{article.authors.split(',')[0]} et al.</span>
+        <span className="truncate">{article.author_names?.split(',')[0]} et al.</span>
       </div>
       <div className="flex items-center gap-2 text-gray-500">
         <Calendar className="w-4 h-4" />
-        <span>{article.year}</span>
+        <span>{article.publication_date}</span>
       </div>
     </div>
     <div className="flex items-end justify-end mt-2">
@@ -319,16 +232,7 @@ const GraphPanel = () => (
 // Article Detail Page
 const ArticleDetailPage = ({ article, onBack }) => {
   const [activeTab, setActiveTab] = useState('abstract');
-  const similarArticles = mockArticles.filter(a => article.similarArticles.includes(a.id));
-
-  const [showExperiments, setShowExperiments] = useState(false);
-  // Example experiment data for chart
-  const experimentData = [
-    { name: 'Deney 1', value: 23 },
-    { name: 'Deney 2', value: 17 },
-    { name: 'Deney 3', value: 29 },
-    { name: 'Deney 4', value: 12 }
-  ];
+  // Benzer makaleler özelliği kaldırıldı (backendde yok)
   return (
     <div className="min-h-screen bg-gray-900">
       <div className="max-w-7xl mx-auto px-6 py-8">
@@ -340,21 +244,21 @@ const ArticleDetailPage = ({ article, onBack }) => {
           <div className="lg:col-span-2">
             <div className="bg-gray-800 border border-gray-700 rounded-xl p-8">
               <span className="px-3 py-1 bg-blue-600/20 text-blue-400 text-xs rounded-full border border-blue-500/30 inline-block mb-4">
-                {article.category}
+                {article.keywords}
               </span>
               <h1 className="text-3xl font-bold text-white mb-4">{article.title}</h1>
               <div className="flex flex-wrap gap-6 text-sm text-gray-400 mb-6">
                 <div className="flex items-center gap-2">
                   <User className="w-4 h-4" />
-                  <span>{article.authors}</span>
+                  <span>{article.author_names}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Calendar className="w-4 h-4" />
-                  <span>{article.year}</span>
+                  <span>{article.publication_date?.slice(0, 10)}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Quote className="w-4 h-4" />
-                  <span>{article.citations} alıntı</span>
+                  <span>{article.citation_count} alıntı</span>
                 </div>
               </div>
               <a href="#" className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 mb-8">
@@ -363,11 +267,10 @@ const ArticleDetailPage = ({ article, onBack }) => {
               </a>
               <div className="border-b border-gray-700 mb-6">
                 <div className="flex gap-4">
-                  {['abstract', 'knowledge', 'experiments', 'pdf'].map((tab) => (
+                  {['abstract', 'knowledge', 'pdf'].map((tab) => (
                     <button key={tab} onClick={() => setActiveTab(tab)} className={`pb-3 px-2 capitalize transition ${activeTab === tab ? 'text-blue-400 border-b-2 border-blue-400 shadow-[0_0_20px_5px_rgba(168,85,247,0.5)]' : 'text-gray-400 hover:text-white hover:shadow-[0_0_20px_5px_rgba(168,85,247,0.3)] focus:shadow-[0_0_20px_5px_rgba(168,85,247,0.5)]'}`}>
                       {tab === 'abstract' && 'Özet'}
-                      {tab === 'knowledge' && 'Bilgi Grafikleri'}
-                      {tab === 'experiments' && 'Deneyler'}
+                      {tab === 'knowledge' && 'Bilgi Grafiği'}
                       {tab === 'pdf' && 'PDF'}
                     </button>
                   ))}
@@ -380,71 +283,21 @@ const ArticleDetailPage = ({ article, onBack }) => {
                     <h3 className="text-xl font-bold text-blue-400 mb-4">Bilgi Grafiği</h3>
                     <div className="bg-gray-900 rounded-lg border border-blue-700 p-8 flex flex-col items-center justify-center w-full max-w-xl">
                       <Network className="w-16 h-16 text-blue-400 mb-4" />
-                      <p className="text-gray-300 text-center mb-2">Makalenin metodolojisi yerine, ilişkili kavramları ve süreçleri gösteren bir bilgi grafiği burada yer alacak.</p>
+                      <p className="text-gray-300 text-center mb-2">Makalenin ilişkili kavramları ve süreçleri gösteren bir bilgi grafiği burada yer alacak.</p>
                       <p className="text-xs text-gray-500 text-center">(Gerçek grafik entegrasyonu için ek geliştirme gereklidir)</p>
                     </div>
                   </div>
-                )}
-                {activeTab === 'experiments' && (
-                  <>
-                    <p>{article.results}</p>
-                    <button
-                      className="mt-4 mb-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-                      onClick={() => setShowExperiments((v) => !v)}
-                    >
-                      Deney Grafiğini Göster
-                    </button>
-                    {showExperiments && (
-                      <div className="bg-gray-900 rounded-lg p-6 border border-blue-700">
-                        <h3 className="text-lg font-bold text-blue-400 mb-4">Deneyler Grafiği</h3>
-                        <ResponsiveContainer width="100%" height={260}>
-                          <BarChart data={experimentData} margin={{ top: 20, right: 30, left: 0, bottom: 30 }}>
-                            <defs>
-                              <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stopColor="#6366f1" />
-                                <stop offset="100%" stopColor="#3b82f6" />
-                              </linearGradient>
-                            </defs>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#374151" vertical={false} />
-                            <XAxis dataKey="name" stroke="#9ca3af" tick={{ fontSize: 14 }} axisLine={false} tickLine={false} label={{ value: 'Deneyler', position: 'bottom', offset: 10, fill: '#9ca3af', fontSize: 16 }} />
-                            <YAxis stroke="#9ca3af" tick={{ fontSize: 14 }} axisLine={false} tickLine={false} label={{ value: 'Sonuç', angle: -90, position: 'insideLeft', fill: '#9ca3af', fontSize: 16 }} />
-                            <Tooltip contentStyle={{ backgroundColor: '#18181b', border: '1px solid #6366f1', borderRadius: 12, color: '#fff', fontSize: 15 }} labelStyle={{ color: '#6366f1', fontWeight: 'bold', fontSize: 16 }} cursor={{ fill: '#6366f1', opacity: 0.1 }} />
-                            <Bar dataKey="value" fill="url(#barGradient)" radius={[12, 12, 0, 0]} barSize={32} />
-                          </BarChart>
-                        </ResponsiveContainer>
-                      </div>
-                    )}
-                  </>
                 )}
                 {activeTab === 'pdf' && (
                   <div className="h-96 bg-gray-900 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-700">
                     <div className="text-center">
                       <FileText className="w-16 h-16 text-gray-600 mx-auto mb-3" />
-                      <p className="text-gray-500">PDF Görüntüleyici</p>
+                      <p className="text-gray-500">PDF Görüntüleyici ({article.file_name})</p>
                     </div>
                   </div>
                 )}
               </div>
             </div>
-            
-          </div>
-          
-          <div className="space-y-6">
-            <div className="bg-gray-800 border border-gray-700 rounded-xl p-6">
-              <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                <BookOpen className="w-5 h-5 text-green-500" />
-                Benzer Makaleler
-              </h3>
-              <div className="space-y-3">
-                {similarArticles.map((similar) => (
-                  <div key={similar.id} className="p-3 bg-gray-900 rounded-lg hover:bg-gray-700 transition cursor-pointer">
-                    <h4 className="text-sm font-medium text-white mb-1">{similar.title}</h4>
-                    <p className="text-xs text-gray-400">{similar.authors.split(',')[0]} et al., {similar.year}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-            
           </div>
         </div>
       </div>
@@ -456,20 +309,46 @@ const ArticleDetailPage = ({ article, onBack }) => {
 const HomePage = ({ onArticleClick }) => {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [articles, setArticles] = useState([]);
 
-  const filteredArticles = mockArticles.filter((article) => {
-    const matchesCategory = selectedCategory === 'all' || article.category === selectedCategory;
-    const matchesSearch = article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         article.authors.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
-  });
+  // Fetch all articles on mount
+  useEffect(() => {
+    const fetchArticles = async () => {
+      try {
+        const response = await fetch('http://localhost:8000/articles/');
+        const data = await response.json();
+        setArticles(data.items);
+      } catch (error) {
+        console.error('Error fetching articles:', error);
+      }
+    };
+    fetchArticles();
+  }, []);
+
+  // Search handler
+  const handleSearch = async () => {
+    try {
+      const response = await fetch(`http://127.0.0.1:8000/articles/?page=1&page_size=10&query=${encodeURIComponent(searchQuery)}`);
+      const data = await response.json();
+      setArticles(data.items);
+    } catch (error) {
+      console.error('Error searching articles:', error);
+    }
+  };
+
+  // const filteredArticles = articles.filter((article) => {
+  //   const matchesCategory = selectedCategory === 'all' || article.category === selectedCategory;
+  //   const matchesSearch = article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  //                        article.authors.toLowerCase().includes(searchQuery.toLowerCase());
+  //   return matchesCategory && matchesSearch;
+  // });
 
   return (
     <div className="min-h-screen bg-gray-900">
       <div className="max-w-7xl mx-auto px-6 py-12">
         <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold text-white mb-4">NASA Biyoloji Araştırmaları</h2>
-          <p className="text-gray-400 text-lg">Uzay biyolojisi alanındaki en son bilimsel makaleleri keşfedin</p>
+          <h2 className="text-4xl font-bold text-white mb-4">NASA Biology Research</h2>
+          <p className="text-gray-400 text-lg">Discover the latest scientific articles in space biology</p>
         </div>
         
         <div className="mb-8">
@@ -479,7 +358,12 @@ const HomePage = ({ onArticleClick }) => {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Makale ara... (başlık, yazar, anahtar kelime)"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleSearch();
+                }
+              }}
+              placeholder="Search for articles... (title, author, keyword)"
               className="w-full pl-12 pr-4 py-4 bg-gray-800 border border-gray-700 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition"
             />
           </div>
@@ -501,10 +385,10 @@ const HomePage = ({ onArticleClick }) => {
         <div className="mb-12">
           <div className="flex items-center gap-2 mb-6">
             <TrendingUp className="w-6 h-6 text-orange-500" />
-            <h3 className="text-xl font-semibold text-white">Trend ve Önerilen Makaleler</h3>
+            <h3 className="text-xl font-semibold text-white">Trending & Recommended Articles</h3>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredArticles.slice(0, 3).map((article) => (
+            {articles?.map((article) => (
               <ArticleCard key={article.id} article={article} onClick={() => onArticleClick(article)} />
             ))}
           </div>
@@ -515,9 +399,9 @@ const HomePage = ({ onArticleClick }) => {
         </div>
         
         <div>
-          <h3 className="text-xl font-semibold text-white mb-6">Tüm Makaleler ({filteredArticles.length})</h3>
+          <h3 className="text-xl font-semibold text-white mb-6">Tüm Makaleler ({articles.length})</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredArticles.map((article) => (
+            {articles?.map((article) => (
               <ArticleCard key={article.id} article={article} onClick={() => onArticleClick(article)} />
             ))}
           </div>
@@ -529,13 +413,28 @@ const HomePage = ({ onArticleClick }) => {
 
 // Main App
 export default function App() {
+
   const [currentPage, setCurrentPage] = useState('home');
   const [selectedArticle, setSelectedArticle] = useState(null);
-  const [showReels, setShowReels] = useState(false);
 
-  const handleArticleClick = (article) => {
-    setSelectedArticle(article);
-    setCurrentPage('detail');
+  // Article detail fetcher
+  const handleArticleClick = async (article) => {
+    try {
+      // If article has id, fetch details from backend
+      if (article && article.id) {
+        const response = await fetch(`http://127.0.0.1:8000/articles/${article.id}`);
+        if (!response.ok) throw new Error('Makale detayları alınamadı');
+        const data = await response.json();
+        setSelectedArticle(data);
+        setCurrentPage('detail');
+      } else {
+        // Fallback: use local article
+        setSelectedArticle(article);
+        setCurrentPage('detail');
+      }
+    } catch (error) {
+      console.error('Makale detay hatası:', error);
+    }
   };
 
   const handleBackToHome = () => {
