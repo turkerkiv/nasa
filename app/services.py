@@ -128,8 +128,8 @@ class ArticleService:
                     publication_date=a.publication_date,
                     citation_count=a.citation_count,
                     abstract_compressed=(
-                        a.abstract[:50] + "..."
-                        if a.abstract and len(a.abstract) > 50
+                        a.abstract[:300] + "..."
+                        if a.abstract and len(a.abstract) > 300
                         else a.abstract or ""
                     ),
                     keywords=a.keywords,
@@ -191,8 +191,8 @@ class ArticleService:
                 publication_date=a.publication_date,
                 citation_count=a.citation_count,
                 abstract_compressed=(
-                    (a.abstract[:50] + "...")
-                    if a.abstract and len(a.abstract) > 50
+                    (a.abstract[:300] + "...")
+                    if a.abstract and len(a.abstract) > 300
                     else a.abstract or ""
                 ),
                 keywords=a.keywords,
@@ -219,8 +219,8 @@ class ArticleService:
                     publication_date=a.publication_date,
                     citation_count=a.citation_count,
                     abstract_compressed=(
-                        (a.abstract[:50] + "...")
-                        if a.abstract and len(a.abstract) > 50
+                        (a.abstract[:300] + "...")
+                        if a.abstract and len(a.abstract) > 300
                         else a.abstract or ""
                     ),
                     keywords=a.keywords,
