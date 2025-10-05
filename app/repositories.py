@@ -13,19 +13,30 @@ class ArticleRepository:
         limit: int | None = None,
         offset: int | None = None,
         search: str | None = None,
+        keyword: str | None = None,
     ):
-        # total count
-        total_result = await self.db.execute(select(ArticleORM))
-        total = len(total_result.scalars().all())
-
-        query = select(ArticleORM)
+        """
+        Return items and total count, supports optional `search` (title/abstract)
+        and `keyword` filter (substring match against ArticleORM.keywords).
+        """
+        # build base query with filters
+        base_query = select(ArticleORM)
 
         if search is not None:
-            query = query.where(
+            base_query = base_query.where(
                 ArticleORM.title.ilike(f"%{search}%")
                 | ArticleORM.abstract.ilike(f"%{search}%")
             )
 
+        if keyword is not None:
+            # simple substring match; keywords are stored as comma/semicolon separated string
+            base_query = base_query.where(ArticleORM.keywords.ilike(f"%{keyword}%"))
+
+        # compute total before applying limit/offset
+        total_result = await self.db.execute(base_query)
+        total = len(total_result.scalars().all())
+
+        query = base_query
         if limit is not None:
             query = query.limit(limit)
         if offset is not None:
@@ -187,3 +198,82 @@ class ArticleRepository:
 
         # Finally, return up to `years` pairs (may be fewer if not enough years exist)
         return pairs[:years]
+
+    async def get_similar_articles(
+        self, article_id: int, limit: int = 3
+    ) -> list[ArticleORM]:
+        """
+        Return up to `limit` articles similar to the article with id `article_id`.
+        Similarity is defined by shared keywords (ArticleORM.keywords string).
+        If there are fewer than `limit` similar articles, fill the remainder with random
+        articles (excluding the original), appended at the end.
+        """
+        # fetch target article
+        target = await self.get_by_id(article_id)
+        if target is None:
+            return []
+
+        def parse_keywords(kws: str) -> set[str]:
+            if not kws:
+                return set()
+            parts = []
+            for part in kws.split(","):
+                subparts = part.split(";") if ";" in part else [part]
+                parts.extend(subparts)
+            return {p.strip().lower() for p in parts if p and p.strip()}
+
+        target_kws = parse_keywords(target.keywords or "")
+
+        # fetch other articles
+        result = await self.db.execute(select(ArticleORM))
+        items = result.scalars().all()
+
+        others = [a for a in items if a.id != article_id]
+
+        similar_scores: list[tuple[int, ArticleORM]] = []
+        for a in others:
+            kws = parse_keywords(a.keywords or "")
+            shared = len(target_kws.intersection(kws)) if target_kws else 0
+            if shared > 0:
+                # score primarily by shared count, tiebreaker by citation_count
+                score = (shared, int(a.citation_count or 0))
+                similar_scores.append((score, a))
+
+        # sort by shared desc then citation_count desc
+        similar_scores.sort(key=lambda x: (x[0][0], x[0][1]), reverse=True)
+        similar_articles = [a for _, a in similar_scores]
+
+        # If not enough similar, pick random fillers (append at end)
+        import random
+
+        fillers: list[ArticleORM] = []
+        if len(similar_articles) < limit:
+            remaining_pool = [a for a in others if a not in similar_articles]
+            random.shuffle(remaining_pool)
+            need = limit - len(similar_articles)
+            fillers = remaining_pool[:need]
+
+        combined = similar_articles[:limit] + fillers
+        # ensure no more than limit
+        return combined[:limit]
+
+    async def get_random(self, limit: int = 10):
+        """
+        Return a random selection of articles up to `limit` and the total count of articles.
+        This method fetches all article IDs, samples up to `limit`, then returns the
+        matching ArticleORM objects in the sampled order.
+        """
+        result = await self.db.execute(select(ArticleORM))
+        items = result.scalars().all()
+        total = len(items)
+
+        if total == 0:
+            return [], 0
+
+        import random
+
+        # shuffle a copy to avoid mutating original
+        pool = items.copy()
+        random.shuffle(pool)
+        sampled = pool[:limit]
+        return sampled, total
