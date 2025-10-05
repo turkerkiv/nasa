@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import StarBackground from './StarBackground';
 import { Search, Filter, TrendingUp, MessageCircle, X, ChevronRight, Calendar, User, ExternalLink, FileText, BarChart3, Network, Sparkles, BookOpen, Quote, Send, ArrowLeft } from 'lucide-react';
 import ExperimentsPreview from './ExperimentsPreview';
-import KnowledgeGraphPreview from './KnowledgeGraphPreview';
 import ArticleReels from './ArticleReels';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import KnowledgeGraphCards from './KnowledgeGraphCards';
@@ -237,7 +236,7 @@ const ArticleDetailPage = ({ article, onBack, onArticleClick }) => {
               </div>
               <div className="text-gray-300 leading-relaxed">
                 {activeTab === 'abstract' && <p>{article.abstract}</p>}
-                {activeTab === 'knowledge' && <KnowledgeGraphCards />}
+                {activeTab === 'knowledge' && <KnowledgeGraphCards articleId={article.id} />}
                 {activeTab === 'pdf' && (
                   <div className="h-96 bg-gray-900 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-700">
                     {article.id ? (
