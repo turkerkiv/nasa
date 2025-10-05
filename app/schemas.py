@@ -40,3 +40,8 @@ class ChatRequest(BaseModel):
 class YearCount(BaseModel):
     year: int
     count: int
+
+
+class YearTrending(BaseModel):
+    year: int
+    article: ArticleListItem

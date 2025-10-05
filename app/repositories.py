@@ -105,3 +105,85 @@ class ArticleRepository:
         # sort by year desc
         pairs = sorted(counter.items(), key=lambda x: x[0], reverse=True)
         return pairs
+
+    async def get_trending_articles_by_recent_years(
+        self, years: int = 3, min_citations: int = 7, min_percentile: float = 0.5
+    ) -> list[tuple[int, ArticleORM]]:
+        """
+        Return a list of (year, top_article) pairs for the most recent `years` years
+        where the top article for the year meets the threshold defined by either
+        `min_citations` or the global `min_percentile` of citation counts.
+
+        - `min_citations`: absolute minimum citation count for the top article.
+        - `min_percentile`: float in [0,1] used to compute the citation value at that
+          percentile across all articles; the top article must meet at least that value.
+
+        Articles without a publication_date are ignored.
+        """
+        result = await self.db.execute(select(ArticleORM))
+        items = result.scalars().all()
+
+        # collect global citation counts for percentile calculation
+        counts = [int(a.citation_count or 0) for a in items]
+
+        percentile_threshold = 0
+        if counts and 0.0 <= min_percentile <= 1.0:
+            sorted_counts = sorted(counts)
+            # compute index for percentile: use ceil-like behavior to be conservative
+            idx = int(len(sorted_counts) * min_percentile) - 1
+            if idx < 0:
+                idx = 0
+            if idx >= len(sorted_counts):
+                idx = len(sorted_counts) - 1
+            percentile_threshold = int(sorted_counts[idx])
+
+        # group by year
+        from collections import defaultdict
+
+        by_year: dict[int, list[ArticleORM]] = defaultdict(list)
+        for a in items:
+            pd = a.publication_date
+            if pd is None:
+                continue
+            year = getattr(pd, "year", None)
+            if year is None:
+                continue
+            by_year[int(year)].append(a)
+
+        if not by_year:
+            return []
+
+        # get most recent years sorted desc (all years, we'll pick up to `years`)
+        sorted_years = sorted(by_year.keys(), reverse=True)
+
+        pairs: list[tuple[int, ArticleORM]] = []
+        included_years: set[int] = set()
+
+        threshold = max(int(min_citations or 0), int(percentile_threshold or 0))
+
+        # First pass: include only years where top article meets threshold
+        for y in sorted_years:
+            if len(pairs) >= years:
+                break
+            candidates = by_year[y]
+            # choose article with max citation_count
+            best = max(candidates, key=lambda art: int(art.citation_count or 0))
+            best_count = int(best.citation_count or 0)
+            if best_count >= threshold:
+                pairs.append((y, best))
+                included_years.add(y)
+
+        # If we don't have enough, fill remaining slots with best articles from recent years
+        if len(pairs) < years:
+            for y in sorted_years:
+                if len(pairs) >= years:
+                    break
+                if y in included_years:
+                    continue
+                candidates = by_year[y]
+                best = max(candidates, key=lambda art: int(art.citation_count or 0))
+                pairs.append((y, best))
+                included_years.add(y)
+
+        # Finally, return up to `years` pairs (may be fewer if not enough years exist)
+        return pairs[:years]
