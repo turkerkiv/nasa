@@ -101,16 +101,23 @@ class ArticleService:
         page_size: int = 10,
         query: str | None = None,
         keyword: str | None = None,
+        israndom: bool = False,
     ) -> PaginatedArticles:
         if page < 1:
             page = 1
         if page_size < 1:
             page_size = 10
 
-        offset = (page - 1) * page_size
-        items, total = await self.articleRepo.get_all(
-            limit=page_size, offset=offset, search=query, keyword=keyword
-        )
+        # If random mode requested, ignore paging, search and keyword filters
+        if israndom:
+            # repository.get_random returns (items, total)
+            items, total = await self.articleRepo.get_random(limit=page_size)
+            # we still return page and page_size for compatibility
+        else:
+            offset = (page - 1) * page_size
+            items, total = await self.articleRepo.get_all(
+                limit=page_size, offset=offset, search=query, keyword=keyword
+            )
 
         pydantic_items: List[ArticleListItem] = []
         for a in items:

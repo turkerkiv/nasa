@@ -256,3 +256,24 @@ class ArticleRepository:
         combined = similar_articles[:limit] + fillers
         # ensure no more than limit
         return combined[:limit]
+
+    async def get_random(self, limit: int = 10):
+        """
+        Return a random selection of articles up to `limit` and the total count of articles.
+        This method fetches all article IDs, samples up to `limit`, then returns the
+        matching ArticleORM objects in the sampled order.
+        """
+        result = await self.db.execute(select(ArticleORM))
+        items = result.scalars().all()
+        total = len(items)
+
+        if total == 0:
+            return [], 0
+
+        import random
+
+        # shuffle a copy to avoid mutating original
+        pool = items.copy()
+        random.shuffle(pool)
+        sampled = pool[:limit]
+        return sampled, total
